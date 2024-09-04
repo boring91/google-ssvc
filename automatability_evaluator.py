@@ -16,7 +16,7 @@ class AutomatabilityEvaluator(BaseEvaluator):
                 * Exploitation is not reliable, due to exploit-prevention techniques (e.g., ASLR) enabled by default.
                 
             - You should assess a CVE with "yes" if:
-                *  The vulnerability allows remote code execution or command injection.
+                * The vulnerability allows remote code execution or command injection.
         
         You answer should be formatted as a json object with two properties: 1) "cve_id" which contains the id of the 
         cve in question, 2) "assessment" which can take one of the three previous values, 3) "justification": explaining 
