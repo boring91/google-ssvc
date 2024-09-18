@@ -6,6 +6,9 @@ from data_sources.cve_data_source import CveDataSource
 
 
 class NistCveDataSource(CveDataSource):
+    @staticmethod
+    def name() -> str:
+        return 'nist'
 
     def _load_data(self, cve_id: str) -> Optional[dict]:
         base_url = 'https://services.nvd.nist.gov/rest/json/cves/2.0'
@@ -20,6 +23,3 @@ class NistCveDataSource(CveDataSource):
             return dict(response.json()['vulnerabilities'][0]['cve'])
         except:
             return None
-
-    def get_name(self) -> str:
-        return 'nist'

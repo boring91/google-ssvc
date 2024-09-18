@@ -1,12 +1,12 @@
 import json
 import os
-from abc import abstractmethod
+from abc import abstractmethod, abstractstaticmethod
 from typing import Optional
 
 
 class CveDataSource:
     def __init__(self):
-        source_name = self.get_name()
+        source_name = self.__class__.name()
         self._cache_path = os.path.join('.', 'data', 'cve_data_source_cache', source_name)
         os.makedirs(self._cache_path, exist_ok=True)
 
@@ -32,8 +32,9 @@ class CveDataSource:
 
         return cve_data
 
+    @staticmethod
     @abstractmethod
-    def get_name(self) -> str:
+    def name() -> str:
         pass
 
     @abstractmethod

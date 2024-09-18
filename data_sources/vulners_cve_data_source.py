@@ -11,11 +11,12 @@ class VulnersCveDataSource(CveDataSource):
         super().__init__()
         self._vulners_api = vulners.VulnersApi(api_key=os.getenv('VULNERS_API_KEY'))
 
+    @staticmethod
+    def name() -> str:
+        return 'vulners'
+
     def _load_data(self, cve_id: str) -> Optional[dict]:
         try:
             return self._vulners_api.get_bulletin(cve_id, fields=["*"])
         except:
             return None
-
-    def get_name(self) -> str:
-        return 'vulners'

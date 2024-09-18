@@ -21,7 +21,8 @@ class CisaKevCveDataSource(CveDataSource):
             with open(self.db_path, 'w') as f:
                 json.dump(db, f)
 
-    def get_name(self) -> str:
+    @staticmethod
+    def name() -> str:
         return 'cisa_kev'
 
     def _load_data(self, cve_id: str) -> Optional[dict]:

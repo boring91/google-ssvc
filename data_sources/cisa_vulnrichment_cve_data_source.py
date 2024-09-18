@@ -16,8 +16,9 @@ def _is_int(s):
 
 
 class CisaVulnrichmentCveDataSource(CveDataSource):
-    def get_name(self) -> str:
-        return 'cisa_vulnrichment'
+    @staticmethod
+    def name() -> str:
+        return 'cisa'
 
     def _load_data(self, cve_id: str) -> Optional[dict]:
         [_, year, sub_id] = cve_id.split('-')
