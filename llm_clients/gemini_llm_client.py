@@ -1,7 +1,7 @@
 import vertexai
 from vertexai.generative_models import SafetySetting, GenerativeModel
 
-from llm_client import LlmClient
+from llm_clients.llm_client import LlmClient
 
 
 class GeminiLlmClient(LlmClient):

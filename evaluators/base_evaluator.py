@@ -3,10 +3,10 @@ import re
 from abc import abstractmethod
 from typing import Literal, Optional
 
-from cve_data_source_aggregator import CveDataSourceAggregator
-from gemini_llm_client import GeminiLlmClient
-from llm_client import LlmClient
-from openai_llm_client import OpenAiLlmClient
+from data_sources.cve_data_source_aggregator import CveDataSourceAggregator
+from llm_clients.gemini_llm_client import GeminiLlmClient
+from llm_clients.llm_client import LlmClient
+from llm_clients.openai_llm_client import OpenAiLlmClient
 
 
 class BaseEvaluator:

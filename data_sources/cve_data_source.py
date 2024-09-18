@@ -7,7 +7,7 @@ from typing import Optional
 class CveDataSource:
     def __init__(self):
         source_name = self.get_name()
-        self._cache_path = os.path.join('.', 'data', source_name)
+        self._cache_path = os.path.join('..', 'data', source_name)
         os.makedirs(self._cache_path, exist_ok=True)
 
     def load(self, cve_id: str) -> Optional[dict]:

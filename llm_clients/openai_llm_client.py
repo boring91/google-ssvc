@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 
-from llm_client import LlmClient
+from llm_clients.llm_client import LlmClient
 
 
 class OpenAiLlmClient(LlmClient):

@@ -2,7 +2,7 @@ from typing import Optional
 
 import requests
 
-from cve_data_source import CveDataSource
+from data_sources.cve_data_source import CveDataSource
 
 
 class NistCveDataSource(CveDataSource):

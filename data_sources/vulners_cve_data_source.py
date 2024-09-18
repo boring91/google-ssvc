@@ -1,10 +1,9 @@
 import os
-import json
 from typing import Optional
 
 import vulners
 
-from cve_data_source import CveDataSource
+from data_sources.cve_data_source import CveDataSource
 
 
 class VulnersCveDataSource(CveDataSource):

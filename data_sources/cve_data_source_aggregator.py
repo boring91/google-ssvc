@@ -1,8 +1,8 @@
 from typing import List
 
-from cve_data_source import CveDataSource
-from nist_cve_data_source import NistCveDataSource
-from vulners_cve_data_source import VulnersCveDataSource
+from data_sources.cve_data_source import CveDataSource
+from data_sources.nist_cve_data_source import NistCveDataSource
+from data_sources.vulners_cve_data_source import VulnersCveDataSource
 
 
 class CveDataSourceAggregator:

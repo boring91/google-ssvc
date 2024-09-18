@@ -6,8 +6,8 @@ class ValueDensityEvaluator(BaseEvaluator):
         return "What is the Value Density of the given CVE? In other words, the concentration of value in the target?"
 
     def _get_description(self) -> str:
-        return """Your assessment should be either "diffuse" or "concentrated". Your assessment methodology should follow
-        these rules:
+        return """Your assessment should be either "diffuse" or "concentrated". Your assessment methodology should 
+        follow these rules:
             - You should assess a CVE with "diffuse" if:
                 * The system that contains the vulnerable component has limited resources. That is, the resources that 
                 the adversary will gain control over with a single exploitation event are relatively small. Examples of 
