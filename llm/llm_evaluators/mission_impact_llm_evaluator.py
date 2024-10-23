@@ -2,6 +2,10 @@ from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
 class MissionImpactLlmEvaluator(BaseLlmEvaluator):
+    @staticmethod
+    def name() -> str:
+        return 'mission_impact'
+
     def _get_question(self) -> str:
         return "What is the CVE's Impact on Mission essential functions of the organization?"
 

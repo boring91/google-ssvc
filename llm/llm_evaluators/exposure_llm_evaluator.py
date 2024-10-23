@@ -2,6 +2,10 @@ from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
 class ExposureLlmEvaluator(BaseLlmEvaluator):
+    @staticmethod
+    def name() -> str:
+        return 'exposure'
+
     def _get_question(self) -> str:
         return "What is the accessible attack surface of the affected system or service? i.e., the Exposure of the CVE?"
 

@@ -2,6 +2,10 @@ from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
 class AutomatabilityLlmEvaluator(BaseLlmEvaluator):
+    @staticmethod
+    def name() -> str:
+        return 'automatability'
+
     def _get_question(self) -> str:
         return "Is the CVE automateble?"
 

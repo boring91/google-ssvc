@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import Literal, Optional
 
 from data_sources.cve_data_source_aggregator import CveDataSourceAggregator
+from db import Db
 from llm.llm_clients.gemini_llm_client import GeminiLlmClient
 from llm.llm_clients.llm_client import LlmClient
 from llm.llm_clients.openai_llm_client import OpenaiLlmClient
@@ -11,16 +12,43 @@ from llm.llm_clients.openai_llm_client import OpenaiLlmClient
 
 class BaseLlmEvaluator:
     def __init__(self, llm: Literal['gemini', 'openai'] = 'gemini'):
+        self._name = self.__class__.name()
+        self._llm = llm
         self._llm_client: LlmClient = GeminiLlmClient() if llm == 'gemini' else OpenaiLlmClient()
         self._cve_data_source_aggregator = CveDataSourceAggregator()
 
-    def evaluate(self, cve_id) -> Optional[dict]:
+    def evaluate(self, cve_id: str) -> Optional[dict]:
+        cve_id = cve_id.upper()
+
+        with Db() as db:
+            cached_data = db.first(
+                'SELECT * FROM llm_evaluator_cache WHERE llm = %s AND cve_id = %s AND decision_point = %s',
+                (self._llm, cve_id, self._name))
+
+        if cached_data is not None:
+            return json.loads(cached_data['data'])
+
         cve_data = self._get_cve_data(cve_id)
 
         query = self._get_prompt(cve_id, cve_data)
         llm_response = self._llm_client.respond(query)
 
-        return _parse_llm_response(llm_response)
+        parsed_response = _parse_llm_response(llm_response)
+
+        if parsed_response is None:
+            return None
+
+        # Cache the response
+        with Db() as db:
+            db.execute('INSERT INTO llm_evaluator_cache(llm, cve_id, decision_point, data) VALUES (%s, %s, %s, %s)',
+                       (self._llm, cve_id, self._name, json.dumps(parsed_response)))
+
+        return parsed_response
+
+    @staticmethod
+    @abstractmethod
+    def name() -> str:
+        pass
 
     @abstractmethod
     def _get_question(self) -> str:

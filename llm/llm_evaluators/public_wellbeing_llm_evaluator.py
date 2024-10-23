@@ -2,6 +2,10 @@ from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
 class PublicWellbeingLlmEvaluator(BaseLlmEvaluator):
+    @staticmethod
+    def name() -> str:
+        return 'public_wellbeing'
+
     def _get_question(self) -> str:
         return "What is the CVE's impact of affected system compromise on humans?"
 

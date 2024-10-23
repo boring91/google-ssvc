@@ -2,6 +2,10 @@ from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
 class TechnicalImpactLlmEvaluator(BaseLlmEvaluator):
+    @staticmethod
+    def name() -> str:
+        return 'technical_impact'
+
     def _get_question(self) -> str:
         return "What is the Technical Impact of exploiting the given CVE?"
 

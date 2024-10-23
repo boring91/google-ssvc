@@ -3,23 +3,21 @@ import os
 from abc import abstractmethod
 from typing import Optional
 
+from db import Db
+
 
 class CveDataSource:
     def __init__(self):
-        source_name = self.__class__.name()
-        self._cache_path = os.path.join('.', 'data', 'cve_data_source_cache', source_name)
-        os.makedirs(self._cache_path, exist_ok=True)
+        self._source_name = self.__class__.name()
 
     def load(self, cve_id: str) -> Optional[dict]:
         cve_id = cve_id.upper()
+        with Db() as db:
+            cached_data = db.first('SELECT * FROM cve_cache WHERE cve_id = %s AND source = %s',
+                                   (cve_id, self._source_name))
 
-        cve_file_path = os.path.join(self._cache_path, f'{cve_id}.json')
-
-        # check if we have a cached data of the cve then
-        # return it.
-        if os.path.exists(cve_file_path):
-            with open(cve_file_path, 'r') as f:
-                return json.load(f)
+        if cached_data is not None:
+            return json.loads(cached_data['data'])
 
         cve_data = self._load_data(cve_id)
 
@@ -27,8 +25,9 @@ class CveDataSource:
             return None
 
         # cache the data
-        with open(cve_file_path, 'w') as f:
-            json.dump(cve_data, f)
+        with Db() as db:
+            db.execute('INSERT INTO cve_cache(cve_id, source, data) VALUES (%s, %s, %s)',
+                       (cve_id, self._source_name, json.dumps(cve_data)))
 
         return cve_data
 

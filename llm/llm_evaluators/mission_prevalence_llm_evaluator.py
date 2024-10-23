@@ -2,6 +2,10 @@ from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
 class MissionPrevalenceLlmEvaluator(BaseLlmEvaluator):
+    @staticmethod
+    def name() -> str:
+        return 'mission_prevalence'
+
     def _get_question(self) -> str:
         return """What is the Impact on Mission Essential Functions of Relevant Entities? I.e., whether the 
         vulnerability affects a critical component for business continuity or fulfilling essential missions such as
