@@ -1,6 +1,6 @@
 import json
 import os
-from abc import abstractmethod, abstractstaticmethod
+from abc import abstractmethod
 from typing import Optional
 
 

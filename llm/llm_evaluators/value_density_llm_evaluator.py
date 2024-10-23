@@ -1,7 +1,7 @@
-from base_evaluator import BaseEvaluator
+from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
-class ValueDensityEvaluator(BaseEvaluator):
+class ValueDensityLlmEvaluator(BaseLlmEvaluator):
     def _get_question(self) -> str:
         return "What is the Value Density of the given CVE? In other words, the concentration of value in the target?"
 

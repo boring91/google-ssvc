@@ -1,7 +1,7 @@
-from evaluators.base_evaluator import BaseEvaluator
+from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
-class TechnicalImpactEvaluator(BaseEvaluator):
+class TechnicalImpactLlmEvaluator(BaseLlmEvaluator):
     def _get_question(self) -> str:
         return "What is the Technical Impact of exploiting the given CVE?"
 

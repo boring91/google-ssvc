@@ -4,14 +4,14 @@ from abc import abstractmethod
 from typing import Literal, Optional
 
 from data_sources.cve_data_source_aggregator import CveDataSourceAggregator
-from llm_clients.gemini_llm_client import GeminiLlmClient
-from llm_clients.llm_client import LlmClient
-from llm_clients.openai_llm_client import OpenAiLlmClient
+from llm.llm_clients.gemini_llm_client import GeminiLlmClient
+from llm.llm_clients.llm_client import LlmClient
+from llm.llm_clients.openai_llm_client import OpenaiLlmClient
 
 
-class BaseEvaluator:
+class BaseLlmEvaluator:
     def __init__(self, llm: Literal['gemini', 'openai'] = 'gemini'):
-        self._llm_client: LlmClient = GeminiLlmClient() if llm == 'gemini' else OpenAiLlmClient()
+        self._llm_client: LlmClient = GeminiLlmClient() if llm == 'gemini' else OpenaiLlmClient()
         self._cve_data_source_aggregator = CveDataSourceAggregator()
 
     def evaluate(self, cve_id) -> Optional[dict]:

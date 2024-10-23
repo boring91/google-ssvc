@@ -1,10 +1,11 @@
 import os
 from openai import OpenAI
 
-from llm_clients.llm_client import LlmClient
+from llm.llm_clients.llm_client import LlmClient
 
 
-class OpenAiLlmClient(LlmClient):
+class OpenaiLlmClient(LlmClient):
+
     def __init__(self):
         self._client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 

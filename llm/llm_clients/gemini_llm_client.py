@@ -1,7 +1,7 @@
 import vertexai
 from vertexai.generative_models import SafetySetting, GenerativeModel
 
-from llm_clients.llm_client import LlmClient
+from llm.llm_clients.llm_client import LlmClient
 
 
 class GeminiLlmClient(LlmClient):
@@ -49,3 +49,6 @@ class GeminiLlmClient(LlmClient):
         answer = ''.join(answer_parts)
 
         return answer
+
+
+gemini_llm_client = GeminiLlmClient()

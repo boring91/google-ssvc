@@ -1,7 +1,7 @@
-from base_evaluator import BaseEvaluator
+from llm.llm_evaluators.base_llm_evaluator import BaseLlmEvaluator
 
 
-class AutomatabilityEvaluator(BaseEvaluator):
+class AutomatabilityLlmEvaluator(BaseLlmEvaluator):
     def _get_question(self) -> str:
         return "Is the CVE automateble?"
 
