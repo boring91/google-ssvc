@@ -3,15 +3,15 @@ from flask_cors import CORS
 from markupsafe import escape
 from dotenv import load_dotenv
 
-from database.db import Db
-from database.migration_manager import MigrationManager
-from ssvc_score_evaluator import SsvcScoreEvaluator
+from ssvc.database.db import Db
+from ssvc.database.migration_manager import MigrationManager
+from ssvc.ssvc_score_evaluator import SsvcScoreEvaluator
 from utils import dataclass_to_camelcase_dict
 
 load_dotenv()
 
 # Apply database migrations
-migration_manager = MigrationManager(Db(), 'database/migrations')
+migration_manager = MigrationManager(Db(), 'ssvc/database/migrations')
 migration_manager.migrate()
 
 app = Flask(__name__)

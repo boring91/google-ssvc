@@ -2,7 +2,7 @@ import json
 from abc import abstractmethod
 from typing import Optional
 
-from database.db import Db
+from ssvc.database.db import Db
 
 
 class CveDataSource:
