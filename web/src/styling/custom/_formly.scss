@@ -1,0 +1,5 @@
+@for $i from 1 through 12 {
+    formly-field .field-size-#{$i} {
+        flex: #{$i};
+    }
+}

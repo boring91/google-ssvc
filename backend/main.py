@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from markupsafe import escape
 from dotenv import load_dotenv
 
@@ -15,10 +16,19 @@ migration_manager.migrate()
 
 app = Flask(__name__)
 
-ssvc = SsvcScoreEvaluator()
+cors = CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "http://localhost:4300",
+        ],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 
 @app.route('/query/<string:cve_id>')
 def query(cve_id: str):
+    ssvc = SsvcScoreEvaluator()
     result = ssvc.evaluate(escape(cve_id))
     return dataclass_to_camelcase_dict(result)

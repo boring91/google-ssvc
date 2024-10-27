@@ -22,6 +22,10 @@ class CisaVulnrichmentCveDataSource(CveDataSource):
         return 'cisa'
 
     def _load_data(self, cve_id: str) -> Optional[dict]:
+        tokens = cve_id.split('-')
+        if len(tokens) != 3:
+            return None
+
         [_, year, sub_id] = cve_id.split('-')
 
         base_url = 'https://api.github.com'

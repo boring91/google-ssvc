@@ -1,0 +1,129 @@
+<!-- app.component.html -->
+<div class="min-h-screen bg-gradient-to-br from-gray-900 to-slate-900 flex items-center justify-center p-4">
+  <div class="w-full max-w-4xl">
+    <div class="backdrop-blur-lg bg-slate-800/30 rounded-2xl p-8 shadow-xl border border-slate-700/50">
+      <h1
+        class="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-blue-400 to-cyan-300 text-transparent bg-clip-text">
+        SVCC Evaluation
+      </h1>
+
+      <div class="space-y-8">
+        <!-- Input Section -->
+        <div class="space-y-2">
+          <label for="cve-id" class="block text-sm font-medium text-gray-200">
+            CVE ID
+          </label>
+          <input
+            [ngModel]="cveId()"
+            (ngModelChange)="updateCveId($event)"
+            type="text"
+            id="cve-id"
+            placeholder="Enter CVE ID (e.g., CVE-2021-44228)"
+            class="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-gray-100 placeholder-gray-400"
+            [class.border-red-500]="error()"
+            [class.focus:border-red-500]="error()"
+            [class.focus:ring-red-500]="error()"
+          >
+        </div>
+
+        <!-- Error Message -->
+        @if (error()) {
+          <app-error-message
+            class="block"
+            [title]="error()!.status === 404 ? 'CVE Not Found' : 'Error'"
+            [message]="error()!.message"
+            [details]="error()!.details"
+          />
+        }
+
+        <!-- Button -->
+        <button
+          (click)="submit()"
+          [disabled]="isSubmitting() || !cveId()"
+          class="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-medium rounded-lg shadow-lg hover:from-blue-600 hover:to-cyan-500 focus:ring-4 focus:ring-cyan-500/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span class="flex items-center justify-center gap-2">
+            @if (isSubmitting()) {
+              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
+            {{ isSubmitting() ? 'Evaluating...' : 'Evaluate' }}
+          </span>
+        </button>
+
+        <!-- Results Section -->
+        @if (result()) {
+          <div class="space-y-6">
+            <!-- Action Result -->
+            <div class="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-lg p-6">
+              <h2 class="text-2xl font-bold text-center mb-2 text-gray-100">
+                Recommended Action
+              </h2>
+              <div class="flex justify-center">
+                <span [class]="assessmentStyles['action'][result()!.action]"
+                      class="px-4 py-2 rounded-full text-lg font-semibold">
+                  {{ result()!.action.toUpperCase() }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Evaluation Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" @staggeredFadeIn>
+              <app-result-card
+                class="card-item"
+                title="Automatability"
+                category="automatability"
+                [result]="result()!.automatability"
+              />
+              <app-result-card
+                class="card-item"
+                title="Exploitation"
+                category="exploitation"
+                [result]="result()!.exploitation"
+              />
+              <app-result-card
+                class="card-item"
+                title="Exposure"
+                category="exposure"
+                [result]="result()!.exposure"
+              />
+              <app-result-card
+                class="card-item"
+                title="Mission Impact"
+                category="missionImpact"
+                [result]="result()!.missionImpact"
+              />
+              <app-result-card
+                class="card-item"
+                title="Mission Prevalence"
+                category="missionPrevalence"
+                [result]="result()!.missionPrevalence"
+              />
+              <app-result-card
+                class="card-item"
+                title="Public Wellbeing"
+                category="publicWellbeing"
+                [result]="result()!.publicWellbeing"
+              />
+              <app-result-card
+                class="card-item"
+                title="Technical Impact"
+                category="technicalImpact"
+                [result]="result()!.technicalImpact"
+              />
+              <app-result-card
+                class="card-item"
+                title="Value Density"
+                category="valueDensity"
+                [result]="result()!.valueDensity"
+              />
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

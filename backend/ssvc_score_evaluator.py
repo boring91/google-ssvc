@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Literal, Optional
+import concurrent.futures
 
 import pandas as pd
 
@@ -29,14 +30,25 @@ class SsvcEvaluationResult:
 
 class SsvcScoreEvaluator:
     def __init__(self, llm: Literal['gemini', 'openai'] = 'gemini'):
-        self._automatability = AutomatabilityEvaluationAggregator(llm)
-        self._exploitation = ExploitationEvaluationAggregator(llm)
-        self._exposure = ExposureEvaluationAggregator(llm)
-        self._mission_impact = MissionImpactEvaluationAggregator(llm)
-        self._mission_prevalence = MissionPrevalenceEvaluationAggregator(llm)
-        self._public_wellbeing = PublicWellbeingEvaluationAggregator(llm)
-        self._technical_impact = TechnicalImpactEvaluationAggregator(llm)
-        self._value_density = ValueDensityEvaluationAggregator(llm)
+        # self._automatability = AutomatabilityEvaluationAggregator(llm)
+        # self._exploitation = ExploitationEvaluationAggregator(llm)
+        # self._exposure = ExposureEvaluationAggregator(llm)
+        # self._mission_impact = MissionImpactEvaluationAggregator(llm)
+        # self._mission_prevalence = MissionPrevalenceEvaluationAggregator(llm)
+        # self._public_wellbeing = PublicWellbeingEvaluationAggregator(llm)
+        # self._technical_impact = TechnicalImpactEvaluationAggregator(llm)
+        # self._value_density = ValueDensityEvaluationAggregator(llm)
+
+        self._aggregators = {
+            'automatability': AutomatabilityEvaluationAggregator(llm),
+            'exploitation': ExploitationEvaluationAggregator(llm),
+            'exposure': ExposureEvaluationAggregator(llm),
+            'mission_impact': MissionImpactEvaluationAggregator(llm),
+            'mission_prevalence': MissionPrevalenceEvaluationAggregator(llm),
+            'public_wellbeing': PublicWellbeingEvaluationAggregator(llm),
+            'technical_impact': TechnicalImpactEvaluationAggregator(llm),
+            'value_density': ValueDensityEvaluationAggregator(llm)
+        }
 
         self._mission_prevalence_wellbeing_df = pd.DataFrame({
             'minimal': {'minimal': 'low', 'support': 'medium', 'essential': 'high'},
@@ -81,38 +93,37 @@ class SsvcScoreEvaluator:
         })
 
     def evaluate(self, cve_id: str) -> Optional[SsvcEvaluationResult]:
-        exploitation = self._exploitation.aggregate(cve_id)
-        automatability = self._automatability.aggregate(cve_id)
-        technical_impact = self._technical_impact.aggregate(cve_id)
+        # TODO: for this to work, we need to make data sources singleton and thread safe.
+        # with concurrent.futures.ThreadPoolExecutor() as executor:
+        #     results = dict(executor.map(lambda x: (x[0], x[1].aggregate(cve_id)), self._aggregators.items()))
 
-        mission_prevalence = self._mission_prevalence.aggregate(cve_id)
-        public_wellbeing = self._public_wellbeing.aggregate(cve_id)
+        results = dict(map(lambda x: (x[0], x[1].aggregate(cve_id)), self._aggregators.items()))
 
-        exposure = self._exposure.aggregate(cve_id)
-        mission_impact = self._mission_impact.aggregate(cve_id)
-        value_density = self._value_density.aggregate(cve_id)
-
-        if (exploitation is None or automatability is None or technical_impact is None or mission_prevalence is None or
-                public_wellbeing is None):
+        print(results)
+        if results is None or any(r is None for r in results):
             return None
 
         mission_prevalence_wellbeing = self._mission_prevalence_wellbeing_df.loc[
-            mission_prevalence.assessment, public_wellbeing.assessment]
+            results['mission_prevalence'].assessment, results['public_wellbeing'].assessment]
+
+        print('mnm', results['exploitation'].assessment)
+        print('mnm', results['automatability'].assessment)
+        print('mnm', results['technical_impact'].assessment)
 
         action = self._tree_df[
-            (self._tree_df['exploitation'] == exploitation.assessment) &
-            (self._tree_df['automatability'] == automatability.assessment) &
-            (self._tree_df['technical_impact'] == technical_impact.assessment) &
+            (self._tree_df['exploitation'] == results['exploitation'].assessment) &
+            (self._tree_df['automatability'] == results['automatability'].assessment) &
+            (self._tree_df['technical_impact'] == results['technical_impact'].assessment) &
             (self._tree_df['mission_and_wellbeing'] == mission_prevalence_wellbeing)].values[0][-1]
 
         return SsvcEvaluationResult(
             action,
-            automatability,
-            exploitation,
-            exposure,
-            mission_impact,
-            mission_prevalence,
-            public_wellbeing,
-            technical_impact,
-            value_density
+            results['automatability'],
+            results['exploitation'],
+            results['exposure'],
+            results['mission_impact'],
+            results['mission_prevalence'],
+            results['public_wellbeing'],
+            results['technical_impact'],
+            results['value_density']
         )

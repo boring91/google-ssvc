@@ -14,4 +14,4 @@ class VulnrichmentAutomatabilityEvaluationUnit(BaseAutomatabilityEvaluationUnit)
         if result is None:
             return None
 
-        return EvaluationResult(result['technical_impact'], 1, 'Found in the CISA Vulnrichment data set.')
+        return EvaluationResult(result['automatable'], 1, 'Found in the CISA Vulnrichment data set.')
