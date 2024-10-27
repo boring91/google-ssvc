@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import Literal, Optional
 
 from data_sources.cve_data_source_aggregator import CveDataSourceAggregator
-from db import Db
+from database.db import Db
 from llm.llm_clients.gemini_llm_client import GeminiLlmClient
 from llm.llm_clients.llm_client import LlmClient
 from llm.llm_clients.openai_llm_client import OpenaiLlmClient
@@ -31,7 +31,11 @@ class BaseLlmEvaluator:
         cve_data = self._get_cve_data(cve_id)
 
         query = self._get_prompt(cve_id, cve_data)
-        llm_response = self._llm_client.respond(query)
+
+        try:
+            llm_response = self._llm_client.respond(query)
+        except:
+            return None
 
         parsed_response = _parse_llm_response(llm_response)
 

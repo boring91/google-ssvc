@@ -1,9 +1,8 @@
 import json
-import os
 from abc import abstractmethod
 from typing import Optional
 
-from db import Db
+from database.db import Db
 
 
 class CveDataSource:

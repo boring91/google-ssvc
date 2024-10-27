@@ -9,4 +9,8 @@ class OpenaiTechnicalImpactEvaluationUnit(BaseTechnicalImpactEvaluationUnit):
     def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['partial', 'total']]]:
         llm_evaluator = TechnicalImpactLlmEvaluator('openai')
         result = llm_evaluator.evaluate(cve_id)
+
+        if result is None:
+            return None
+
         return EvaluationResult(result['assessment'], result['confidence'], result['justification'])

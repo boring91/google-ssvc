@@ -4,9 +4,9 @@ from evaluation_aggregators.base_evaluation_aggregator import BaseEvaluationAggr
 from evaluation_units.evaluation_unit import EvaluationUnit
 from evaluation_units.mission_prevalence.base_mission_prevalence_evaluation_unit import \
     BaseMissionPrevalenceEvaluationUnit
-from evaluation_units.mission_prevalence.gemini_mission_prevalence_exposure_evaluation_unit import \
+from evaluation_units.mission_prevalence.gemini_mission_prevalence_evaluation_unit import \
     GeminiMissionPrevalenceEvaluationUnit
-from evaluation_units.mission_prevalence.openai_mission_prevalence_exposure_evaluation_unit import \
+from evaluation_units.mission_prevalence.openai_mission_prevalence_evaluation_unit import \
     OpenaiMissionPrevalenceEvaluationUnit
 
 

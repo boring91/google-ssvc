@@ -9,4 +9,8 @@ class OpenaiAutomatabilityEvaluationUnit(BaseAutomatabilityEvaluationUnit):
     def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['yes', 'no']]]:
         llm_evaluator = AutomatabilityLlmEvaluator('openai')
         result = llm_evaluator.evaluate(cve_id)
+
+        if result is None:
+            return None
+
         return EvaluationResult(result['assessment'], result['confidence'], result['justification'])

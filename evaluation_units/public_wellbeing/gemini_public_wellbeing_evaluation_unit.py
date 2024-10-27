@@ -10,4 +10,8 @@ class GeminiPublicWellbeingEvaluationUnit(BasePublicWellbeingEvaluationUnit):
         EvaluationResult[Literal['minimal', 'material', 'irreversible']]]:
         llm_evaluator = PublicWellbeingLlmEvaluator('gemini')
         result = llm_evaluator.evaluate(cve_id)
+
+        if result is None:
+            return None
+
         return EvaluationResult(result['assessment'], result['confidence'], result['justification'])

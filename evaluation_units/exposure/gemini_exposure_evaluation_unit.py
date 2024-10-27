@@ -9,4 +9,8 @@ class GeminiExposureEvaluationUnit(BaseExposureEvaluationUnit):
     def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['open', 'small', 'controlled']]]:
         llm_evaluator = ExposureLlmEvaluator('gemini')
         result = llm_evaluator.evaluate(cve_id)
+
+        if result is None:
+            return None
+
         return EvaluationResult(result['assessment'], result['confidence'], result['justification'])

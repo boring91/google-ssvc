@@ -10,4 +10,8 @@ class OpenaiMissionImpactEvaluationUnit(BaseMissionImpactEvaluationUnit):
         EvaluationResult[Literal['degraded', 'mef_support_crippled', 'mef_failure', 'mission_failure']]]:
         llm_evaluator = MissionImpactLlmEvaluator('openai')
         result = llm_evaluator.evaluate(cve_id)
+
+        if result is None:
+            return None
+
         return EvaluationResult(result['assessment'], result['confidence'], result['justification'])
