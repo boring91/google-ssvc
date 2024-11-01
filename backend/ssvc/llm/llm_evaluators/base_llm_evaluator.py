@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import Literal, Optional
 
 from app.data_sources.cve_data_source_aggregator import CveDataSourceAggregator
-from ssvc.database.db import Db
+from database.db import Db
 from ssvc.llm.llm_clients.gemini_llm_client import GeminiLlmClient
 from ssvc.llm.llm_clients.llm_client import LlmClient
 from ssvc.llm.llm_clients.openai_llm_client import OpenaiLlmClient
@@ -49,7 +49,7 @@ class BaseLlmEvaluator:
                 INSERT INTO llm_evaluator_cache(llm, cve_id, decision_point, data) VALUES (%s, %s, %s, %s)
                 ON CONFLICT (llm, cve_id, decision_point) DO NOTHING;
                 """,
-                       (self._llm, cve_id, self._name, json.dumps(parsed_response)))
+                (self._llm, cve_id, self._name, json.dumps(parsed_response)))
 
         return parsed_response
 

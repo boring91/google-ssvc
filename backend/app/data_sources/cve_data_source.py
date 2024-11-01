@@ -3,7 +3,7 @@ import logging
 from abc import abstractmethod
 from typing import Optional
 
-from ssvc.database.db import Db
+from database.db import Db
 
 
 class CveDataSource:

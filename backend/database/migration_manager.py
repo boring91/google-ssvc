@@ -5,8 +5,8 @@ import logging
 
 import pandas as pd
 
-from ssvc.database.db import Db
-from ssvc.database.sql_parser import SQLParser
+from database.db import Db
+from database.sql_parser import SQLParser
 
 logging.basicConfig(level=logging.INFO)
 

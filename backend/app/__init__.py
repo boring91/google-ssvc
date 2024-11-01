@@ -10,6 +10,12 @@ load_dotenv('./.env.dev')
 
 
 def create_app(config_class=Config):
+    from database.db import Db
+    from database.migration_manager import MigrationManager
+
+    migration_manager = MigrationManager(Db(), 'database/migrations')
+    migration_manager.migrate()
+
     app = Flask(__name__)
     app.config.from_object(config_class)
 
