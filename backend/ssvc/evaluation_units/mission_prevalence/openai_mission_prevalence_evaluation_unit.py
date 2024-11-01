@@ -8,7 +8,7 @@ from ssvc.llm.llm_evaluators.mission_prevalence_llm_evaluator import MissionPrev
 
 class OpenaiMissionPrevalenceEvaluationUnit(BaseMissionPrevalenceEvaluationUnit):
     def _process_evaluation(self, cve_id: str) -> Optional[
-        EvaluationResult[Literal['minimal', 'support', 'essential']]]:
+        EvaluationResult]:
         llm_evaluator = MissionPrevalenceLlmEvaluator('openai')
         result = llm_evaluator.evaluate(cve_id)
 

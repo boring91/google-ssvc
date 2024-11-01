@@ -1,13 +1,11 @@
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Literal, Generic, TypeVar, Optional
-
-T = TypeVar('T')
+from typing import Literal, Optional
 
 
 @dataclass
-class EvaluationResult(Generic[T]):
-    assessment: T
+class EvaluationResult:
+    assessment: str
     confidence: float
     justification: str
 
@@ -31,9 +29,9 @@ class EvaluationUnit:
         'public_wellbeing']:
         pass
 
-    def evaluate(self, cve_id: str) -> Optional[EvaluationResult[str]]:
+    def evaluate(self, cve_id: str) -> Optional[EvaluationResult]:
         return self._process_evaluation(cve_id.upper())
 
     @abstractmethod
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[str]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         pass

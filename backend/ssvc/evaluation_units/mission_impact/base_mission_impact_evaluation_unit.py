@@ -19,5 +19,5 @@ class BaseMissionImpactEvaluationUnit(EvaluationUnit):
 
     @abstractmethod
     def _process_evaluation(self, cve_id: str) -> Optional[
-        EvaluationResult[Literal['degraded', 'mef_support_crippled', 'mef_failure', 'mission_failure']]]:
+        EvaluationResult]:
         pass

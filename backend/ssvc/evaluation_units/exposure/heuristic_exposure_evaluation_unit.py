@@ -8,7 +8,7 @@ from ssvc.utils import extract_cvss_from_nist, standardize_cvss
 
 class HeuristicExposureEvaluationUnit(BaseExposureEvaluationUnit):
 
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['small', 'controlled', 'open']]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         """
         Exposure:
         if AV == "N" and PR == "N" and UI == "N":

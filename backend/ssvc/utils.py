@@ -1,4 +1,17 @@
-from typing import Optional
+import json
+from typing import Optional, TypeVar, Type
+
+from dacite import from_dict
+
+T = TypeVar('T')
+
+
+def from_json(json_string: str, data_class: Type[T]) -> T:
+    try:
+        data = json.loads(json_string)
+        return from_dict(data_class=data_class, data=data)
+    except Exception as e:
+        raise ValueError(f"Failed to parse JSON: {e}")
 
 
 def extract_cvss_from_nist(data: dict) -> Optional[str]:

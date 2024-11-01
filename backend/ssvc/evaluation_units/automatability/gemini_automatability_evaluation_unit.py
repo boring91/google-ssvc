@@ -6,7 +6,7 @@ from ssvc.llm.llm_evaluators.automatability_llm_evaluator import AutomatabilityL
 
 
 class GeminiAutomatabilityEvaluationUnit(BaseAutomatabilityEvaluationUnit):
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['yes', 'no']]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         llm_evaluator = AutomatabilityLlmEvaluator('gemini')
         result = llm_evaluator.evaluate(cve_id)
 

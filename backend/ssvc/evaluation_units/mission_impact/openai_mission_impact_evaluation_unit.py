@@ -7,7 +7,7 @@ from ssvc.llm.llm_evaluators.mission_impact_llm_evaluator import MissionImpactLl
 
 class OpenaiMissionImpactEvaluationUnit(BaseMissionImpactEvaluationUnit):
     def _process_evaluation(self, cve_id: str) -> Optional[
-        EvaluationResult[Literal['degraded', 'mef_support_crippled', 'mef_failure', 'mission_failure']]]:
+        EvaluationResult]:
         llm_evaluator = MissionImpactLlmEvaluator('openai')
         result = llm_evaluator.evaluate(cve_id)
 

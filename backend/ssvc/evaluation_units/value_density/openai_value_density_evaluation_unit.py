@@ -6,7 +6,7 @@ from ssvc.llm.llm_evaluators.value_density_llm_evaluator import ValueDensityLlmE
 
 
 class OpenaiValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['centralized', 'diffused']]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         llm_evaluator = ValueDensityLlmEvaluator('openai')
         result = llm_evaluator.evaluate(cve_id)
 

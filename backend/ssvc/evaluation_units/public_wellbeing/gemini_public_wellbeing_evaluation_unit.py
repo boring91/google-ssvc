@@ -7,7 +7,7 @@ from ssvc.llm.llm_evaluators.public_wellbeing_llm_evaluator import PublicWellbei
 
 class GeminiPublicWellbeingEvaluationUnit(BasePublicWellbeingEvaluationUnit):
     def _process_evaluation(self, cve_id: str) -> Optional[
-        EvaluationResult[Literal['minimal', 'material', 'irreversible']]]:
+        EvaluationResult]:
         llm_evaluator = PublicWellbeingLlmEvaluator('gemini')
         result = llm_evaluator.evaluate(cve_id)
 

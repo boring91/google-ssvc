@@ -1,9 +1,11 @@
-from dataclasses import dataclass
+import json
+from dataclasses import dataclass, asdict
 from typing import Literal, Optional
 
 import concurrent.futures
 import pandas as pd
 
+from database.db import Db
 from ssvc.evaluation_aggregators.automatability_evaluation_aggregator import AutomatabilityEvaluationAggregator
 from ssvc.evaluation_aggregators.exploitation_evaluation_aggregator import ExploitationEvaluationAggregator
 from ssvc.evaluation_aggregators.exposure_evaluation_aggregator import ExposureEvaluationAggregator
@@ -13,6 +15,7 @@ from ssvc.evaluation_aggregators.public_wellbeing_evaluation_aggregator import P
 from ssvc.evaluation_aggregators.technical_impact_evaluation_aggregator import TechnicalImpactEvaluationAggregator
 from ssvc.evaluation_aggregators.value_density_evaluation_aggregator import ValueDensityEvaluationAggregator
 from ssvc.evaluation_units.evaluation_unit import EvaluationResult
+from ssvc.utils import from_json
 
 
 @dataclass
@@ -84,6 +87,12 @@ class SsvcScoreEvaluator:
         })
 
     def evaluate(self, cve_id: str) -> Optional[SsvcEvaluationResult]:
+        # Check the cache first
+        with Db() as db:
+            result = db.first('SELECT * FROM ssvc_results WHERE cve_id=%s', (cve_id,))
+            if result is not None:
+                return from_json(result['result'], SsvcEvaluationResult)
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = dict(executor.map(lambda x: (x[0], x[1].aggregate(cve_id)), self._aggregators.items()))
 
@@ -102,7 +111,7 @@ class SsvcScoreEvaluator:
             (self._tree_df['technical_impact'] == results['technical_impact'].assessment) &
             (self._tree_df['mission_and_wellbeing'] == mission_prevalence_wellbeing)].values[0][-1]
 
-        return SsvcEvaluationResult(
+        result = SsvcEvaluationResult(
             action,
             results['automatability'],
             results['exploitation'],
@@ -113,3 +122,10 @@ class SsvcScoreEvaluator:
             results['technical_impact'],
             results['value_density']
         )
+
+        # Cache the result:
+        with Db() as db:
+            db.execute('INSERT INTO ssvc_results(cve_id, result) VALUES (%s, %s)',
+                       (cve_id, json.dumps(asdict(result))))
+
+        return result

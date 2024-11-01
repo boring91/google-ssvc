@@ -18,5 +18,5 @@ class BaseTechnicalImpactEvaluationUnit(EvaluationUnit):
         return 'technical_impact'
 
     @abstractmethod
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['partial', 'total']]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         pass

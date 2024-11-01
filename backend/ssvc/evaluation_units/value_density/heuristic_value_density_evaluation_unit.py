@@ -8,7 +8,7 @@ from ssvc.utils import extract_cvss_from_nist, standardize_cvss
 
 class HeuristicValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
 
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['centralized', 'diffused']]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         """
         Value density:
         IF Attack Vector (AV) is Network (AV:N)

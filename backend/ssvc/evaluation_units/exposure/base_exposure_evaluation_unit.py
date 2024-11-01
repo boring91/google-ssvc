@@ -18,5 +18,5 @@ class BaseExposureEvaluationUnit(EvaluationUnit):
         return 'exposure'
 
     @abstractmethod
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['small', 'controlled', 'open']]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         pass

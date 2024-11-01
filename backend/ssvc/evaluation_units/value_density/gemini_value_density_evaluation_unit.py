@@ -6,7 +6,7 @@ from ssvc.llm.llm_evaluators.value_density_llm_evaluator import ValueDensityLlmE
 
 
 class GeminiValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['centralized', 'diffused']]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         llm_evaluator = ValueDensityLlmEvaluator('gemini')
         result = llm_evaluator.evaluate(cve_id)
 

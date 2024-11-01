@@ -19,5 +19,5 @@ class BaseMissionPrevalenceEvaluationUnit(EvaluationUnit):
 
     @abstractmethod
     def _process_evaluation(self, cve_id: str) -> Optional[
-        EvaluationResult[Literal['minimal', 'support', 'essential']]]:
+        EvaluationResult]:
         pass

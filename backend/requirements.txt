@@ -10,3 +10,4 @@ psycopg2~=2.9.10
 Flask-Cors~=5.0.0
 gunicorn~=21.2.0
 Werkzeug~=3.0.6
+dacite~=1.8.1

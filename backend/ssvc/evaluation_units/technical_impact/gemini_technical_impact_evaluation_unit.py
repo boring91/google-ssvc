@@ -6,7 +6,7 @@ from ssvc.llm.llm_evaluators.technical_impact_llm_evaluator import TechnicalImpa
 
 
 class GeminiTechnicalImpactEvaluationUnit(BaseTechnicalImpactEvaluationUnit):
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult[Literal['partial', 'total']]]:
+    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
         llm_evaluator = TechnicalImpactLlmEvaluator('gemini')
         result = llm_evaluator.evaluate(cve_id)
 
