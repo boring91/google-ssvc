@@ -1,57 +1,57 @@
 .ng-select-container {
-    height: 42px !important;
+  height: 42px !important;
 }
 
 // Item in field
 .ng-select.ng-select-multiple
-    .ng-select-container
-    .ng-value-container
-    .ng-value {
-    @apply bg-primary-500/10;
+.ng-select-container
+.ng-value-container
+.ng-value {
+  @apply bg-primary-500/10;
 }
 
 // Hovered x button for item in field
 .ng-select.ng-select-multiple
-    .ng-select-container
-    .ng-value-container
-    .ng-value
-    .ng-value-icon:hover {
-    @apply bg-primary-500/30;
+.ng-select-container
+.ng-value-container
+.ng-value
+.ng-value-icon:hover {
+  @apply bg-primary-500/30;
 }
 
 // Hovered item from dropdown list
 .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-marked {
-    @apply bg-primary-500/10;
+  @apply bg-primary-500/10;
 }
 
 // Selected item from dropdown list
 .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected,
 .ng-dropdown-panel
-    .ng-dropdown-panel-items
-    .ng-option.ng-option-selected.ng-option-marked {
-    @apply bg-primary-500/20;
+.ng-dropdown-panel-items
+.ng-option.ng-option-selected.ng-option-marked {
+  @apply bg-primary-500/20;
 }
 
 // Border between x and title in selected items in field
 .ng-select.ng-select-multiple
-    .ng-select-container
-    .ng-value-container
-    .ng-value
-    .ng-value-icon.right {
-    border-left: 1px solid rgb(var(--primary-500) 0.5);
+.ng-select-container
+.ng-value-container
+.ng-value
+.ng-value-icon.right {
+  border-left: 1px solid rgb(var(--primary-500) 0.5);
 }
 
 // Border between x and title in selected items in field (rtl)
 [dir='rtl']
-    .ng-select.ng-select-multiple
-    .ng-select-container
-    .ng-value-container
-    .ng-value
-    .ng-value-icon.right {
-    border-right: 1px solid rgb(var(--primary-500) 0.5);
-    border-left: 0;
+.ng-select.ng-select-multiple
+.ng-select-container
+.ng-value-container
+.ng-value
+.ng-value-icon.right {
+  border-right: 1px solid rgb(var(--primary-500) 0.5);
+  border-left: 0;
 }
 
 .ng-select.ng-select-focused:not(.ng-select-opened) > .ng-select-container {
-    @apply border border-primary-500 outline-none ring-2 ring-primary-100;
+  @apply border border-primary-500 outline-none ring-2 ring-primary-100;
 }

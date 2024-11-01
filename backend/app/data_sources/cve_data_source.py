@@ -1,8 +1,9 @@
 import json
+import logging
 from abc import abstractmethod
 from typing import Optional
 
-from app.ssvc.database.db import Db
+from ssvc.database.db import Db
 
 
 class CveDataSource:
@@ -18,6 +19,7 @@ class CveDataSource:
         if cached_data is not None:
             return json.loads(cached_data['data'])
 
+        logging.info(f'No cached data was found for cve {cve_id}, loading from data source.')
         cve_data = self._load_data(cve_id)
 
         if cve_data is None:
@@ -25,8 +27,12 @@ class CveDataSource:
 
         # cache the data
         with Db() as db:
-            db.execute('INSERT INTO cve_cache(cve_id, source, data) VALUES (%s, %s, %s)',
-                       (cve_id, self._source_name, json.dumps(cve_data)))
+            db.execute(
+                """
+                INSERT INTO cve_cache(cve_id, source, data) VALUES (%s, %s, %s) 
+                ON CONFLICT (cve_id, source) DO NOTHING;
+                """,
+                (cve_id, self._source_name, json.dumps(cve_data)))
 
         return cve_data
 

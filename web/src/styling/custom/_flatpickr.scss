@@ -3,25 +3,25 @@
 .flatpickr-weekday,
 .flatpickr-monthDropdown-months,
 .flatpickr-day.selected {
-    @apply bg-primary-300 #{!important};
+  @apply bg-primary-300 #{!important};
 }
 
 .flatpickr-calendar.arrowTop::after {
-    border-bottom-color: rgb(var(--primary-300)) !important;
+  border-bottom-color: rgb(var(--primary-300)) !important;
 }
 
 .flatpickr-calendar.arrowTop::before {
-    border-bottom-color: rgb(var(--primary-300)) !important;
+  border-bottom-color: rgb(var(--primary-300)) !important;
 }
 
 .flatpickr-day.selected {
-    @apply border-none #{!important};
+  @apply border-none #{!important};
 }
 
 .flatpickr-calendar.arrowBottom::before {
-    border-top-color: rgb(var(--primary-300)) !important;
+  border-top-color: rgb(var(--primary-300)) !important;
 }
 
 .flatpickr-calendar.arrowBottom::after {
-    border-top-color: rgb(var(--primary-300)) !important;
+  border-top-color: rgb(var(--primary-300)) !important;
 }

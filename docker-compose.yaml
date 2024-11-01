@@ -1,0 +1,38 @@
+services:
+    ssvc-db:
+        image: postgres:15-alpine
+        container_name: ssvc-db
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        env_file:
+            - .env.prod
+        restart: unless-stopped
+
+    ssvc-backend:
+        image: boring91/ssvcbackend
+        container_name: ssvc-backend
+        env_file:
+            - .env.prod
+        depends_on:
+            - ssvc-db
+        restart: unless-stopped
+
+    ssvc-web:
+        image: boring91/ssvcweb
+        container_name: ssvc-web
+        env_file:
+            - .env.prod
+        depends_on:
+            - ssvc-backend
+        restart: unless-stopped
+
+    ssvc-router:
+        image: boring91/ssvcrouter
+        container_name: ssvc-router
+        restart: unless-stopped
+        depends_on:
+            - ssvc-backend
+            - ssvc-web
+
+volumes:
+    postgres_data:

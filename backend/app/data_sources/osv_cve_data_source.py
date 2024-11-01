@@ -17,4 +17,4 @@ class OsvCveDataSource(CveDataSource):
         if not (200 <= response.status_code < 300):
             return None
 
-        return response.json();
+        return response.json()

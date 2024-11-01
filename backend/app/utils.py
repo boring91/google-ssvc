@@ -1,7 +1,11 @@
 from dataclasses import asdict
+from typing import Optional
 
 
-def dataclass_to_camelcase_dict(obj: any) -> dict:
+def dataclass_to_camelcase_dict(obj: Optional[any]) -> Optional[dict]:
+    if obj is None:
+        return obj
+
     def snake_to_camel(snake_str: str):
         components = snake_str.split('_')
         return components[0] + ''.join(x.title() for x in components[1:])

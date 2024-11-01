@@ -1,21 +1,21 @@
 /* width */
 ::-webkit-scrollbar {
-    width: 5px;
-    height: 3px; /* Change this value to control thickness */
+  width: 5px;
+  height: 3px; /* Change this value to control thickness */
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-    @apply bg-primary-500/40;
+  @apply bg-primary-500/40;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    @apply bg-primary-500/80;
+  border-radius: 5px;
+  @apply bg-primary-500/80;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary-500;
+  @apply bg-primary-500;
 }

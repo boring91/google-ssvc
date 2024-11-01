@@ -5,61 +5,61 @@ input[type='search'],
 input[type='url'],
 input[type='number'],
 textarea {
-    @apply rounded border border-gray-300 p-2 transition-all focus-within:border-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-700;
+  @apply rounded border border-gray-300 p-2 transition-all focus-within:border-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-700;
 
-    form.ng-submitted &.ng-invalid,
-    &.ng-dirty.ng-invalid,
-    &.ng-touched.ng-invalid {
-        @apply border-red-500 focus-within:ring-red-100;
-    }
+  form.ng-submitted &.ng-invalid,
+  &.ng-dirty.ng-invalid,
+  &.ng-touched.ng-invalid {
+    @apply border-red-500 focus-within:ring-red-100;
+  }
 }
 
 lib-datetime-input,
 lib-location-input {
-    form.ng-submitted &.ng-invalid,
-    &.ng-dirty.ng-invalid,
-    &.ng-touched.ng-invalid {
-        input {
-            @apply border-red-500 focus-within:ring-red-100;
-        }
+  form.ng-submitted &.ng-invalid,
+  &.ng-dirty.ng-invalid,
+  &.ng-touched.ng-invalid {
+    input {
+      @apply border-red-500 focus-within:ring-red-100;
     }
+  }
 }
 
 lib-multilingual-text-input {
-    form.ng-submitted &.ng-invalid,
-    &.ng-dirty.ng-invalid,
-    &.ng-touched.ng-invalid {
-        .lang-label {
-            @apply border-red-300 bg-red-200 text-red-400;
-        }
-
-        textarea,
-        input {
-            @apply border-red-500 focus-within:ring-red-100;
-        }
+  form.ng-submitted &.ng-invalid,
+  &.ng-dirty.ng-invalid,
+  &.ng-touched.ng-invalid {
+    .lang-label {
+      @apply border-red-300 bg-red-200 text-red-400;
     }
+
+    textarea,
+    input {
+      @apply border-red-500 focus-within:ring-red-100;
+    }
+  }
 }
 
 lib-select-input {
-    form.ng-submitted &.ng-invalid .ng-select-container,
-    &.ng-invalid ng-select.ng-dirty .ng-select-container,
-    &.ng-invalid ng-select.ng-touched .ng-select-container {
-        @apply border-red-500 focus-within:ring-red-100 #{!important};
-    }
+  form.ng-submitted &.ng-invalid .ng-select-container,
+  &.ng-invalid ng-select.ng-dirty .ng-select-container,
+  &.ng-invalid ng-select.ng-touched .ng-select-container {
+    @apply border-red-500 focus-within:ring-red-100 #{!important};
+  }
 }
 
 lib-file-input {
-    form.ng-submitted &.ng-invalid input,
-    &.ng-dirty.ng-invalid input,
-    &.ng-touched.ng-invalid input {
-        @apply border-red-500 focus-within:ring-red-100;
-    }
+  form.ng-submitted &.ng-invalid input,
+  &.ng-dirty.ng-invalid input,
+  &.ng-touched.ng-invalid input {
+    @apply border-red-500 focus-within:ring-red-100;
+  }
 }
 
 lib-number-input {
-    form.ng-submitted &.ng-invalid input,
-    &.ng-dirty.ng-invalid input,
-    &.ng-touched.ng-invalid input {
-        @apply border-red-500 focus-within:ring-red-100;
-    }
+  form.ng-submitted &.ng-invalid input,
+  &.ng-dirty.ng-invalid input,
+  &.ng-touched.ng-invalid input {
+    @apply border-red-500 focus-within:ring-red-100;
+  }
 }

@@ -10,7 +10,7 @@ from app.data_sources.vulners_cve_data_source import VulnersCveDataSource
 class CveDataSourceAggregator:
     def __init__(self):
         self._data_sources: List[CveDataSource] = [
-            VulnersCveDataSource(),
+            # VulnersCveDataSource(),
             NistCveDataSource(),
             CisaKevCveDataSource(),
             CisaVulnrichmentCveDataSource()
