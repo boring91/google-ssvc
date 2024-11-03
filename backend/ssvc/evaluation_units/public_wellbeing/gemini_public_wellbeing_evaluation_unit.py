@@ -6,10 +6,10 @@ from ssvc.llm.llm_evaluators.public_wellbeing_llm_evaluator import PublicWellbei
 
 
 class GeminiPublicWellbeingEvaluationUnit(BasePublicWellbeingEvaluationUnit):
-    def _process_evaluation(self, cve_id: str) -> Optional[
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[
         EvaluationResult]:
         llm_evaluator = PublicWellbeingLlmEvaluator('gemini')
-        result = llm_evaluator.evaluate(cve_id)
+        result = llm_evaluator.evaluate(cve_id, reevaluate)
 
         if result is None:
             return None

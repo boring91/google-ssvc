@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from markupsafe import escape
 
@@ -31,9 +31,11 @@ def create_app(config_class=Config):
 
     @app.route('/query/<string:cve_id>')
     def query(cve_id: str):
+        reevaluate = request.args.get('reevaluate', False, type=bool)
+
         from ssvc.ssvc_score_evaluator import SsvcScoreEvaluator
         ssvc = SsvcScoreEvaluator()
-        result = ssvc.evaluate(escape(cve_id))
+        result = ssvc.evaluate(escape(cve_id), reevaluate)
         return {} if result is None else dataclass_to_camelcase_dict(result)
 
     return app

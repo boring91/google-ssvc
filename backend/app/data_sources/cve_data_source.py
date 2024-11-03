@@ -10,16 +10,23 @@ class CveDataSource:
     def __init__(self):
         self._source_name = self.__class__.name()
 
-    def load(self, cve_id: str) -> Optional[dict]:
+    def load(self, cve_id: str, reload: bool = False) -> Optional[dict]:
         cve_id = cve_id.upper()
-        with Db() as db:
-            cached_data = db.first('SELECT * FROM cve_cache WHERE cve_id = %s AND source = %s',
-                                   (cve_id, self._source_name))
+        if not reload:
+            with Db() as db:
+                cached_data = db.first('SELECT * FROM cve_cache WHERE cve_id = %s AND source = %s',
+                                       (cve_id, self._source_name))
 
-        if cached_data is not None:
-            return json.loads(cached_data['data'])
+            if cached_data is not None:
+                return json.loads(cached_data['data'])
 
-        logging.info(f'No cached data was found for cve {cve_id}, loading from data source.')
+            logging.info(f'No cached data was found for cve {cve_id}, loading from data source.')
+
+        else:
+            with Db() as db:
+                db.execute('DELETE FROM cve_cache WHERE cve_id = %s AND source = %s',
+                           (cve_id, self._source_name))
+
         cve_data = self._load_data(cve_id)
 
         if cve_data is None:

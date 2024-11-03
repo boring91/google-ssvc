@@ -6,9 +6,9 @@ from ssvc.llm.llm_evaluators.value_density_llm_evaluator import ValueDensityLlmE
 
 
 class OpenaiValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[EvaluationResult]:
         llm_evaluator = ValueDensityLlmEvaluator('openai')
-        result = llm_evaluator.evaluate(cve_id)
+        result = llm_evaluator.evaluate(cve_id, reevaluate)
 
         if result is None:
             return None

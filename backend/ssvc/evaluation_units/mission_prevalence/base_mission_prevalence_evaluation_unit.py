@@ -18,6 +18,6 @@ class BaseMissionPrevalenceEvaluationUnit(EvaluationUnit):
         return 'mission_prevalence'
 
     @abstractmethod
-    def _process_evaluation(self, cve_id: str) -> Optional[
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[
         EvaluationResult]:
         pass

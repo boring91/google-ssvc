@@ -18,5 +18,5 @@ class BaseAutomatabilityEvaluationUnit(EvaluationUnit):
         return 'automatability'
 
     @abstractmethod
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[EvaluationResult]:
         pass

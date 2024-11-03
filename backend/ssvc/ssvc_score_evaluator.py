@@ -86,15 +86,20 @@ class SsvcScoreEvaluator:
                          'act']
         })
 
-    def evaluate(self, cve_id: str) -> Optional[SsvcEvaluationResult]:
-        # Check the cache first
-        with Db() as db:
-            result = db.first('SELECT * FROM ssvc_results WHERE cve_id=%s', (cve_id,))
-            if result is not None:
-                return from_json(result['result'], SsvcEvaluationResult)
+    def evaluate(self, cve_id: str, reevaluate: bool = False) -> Optional[SsvcEvaluationResult]:
+        if not reevaluate:
+            # Check the cache first
+            with Db() as db:
+                result = db.first('SELECT * FROM ssvc_results WHERE cve_id=%s', (cve_id,))
+                if result is not None:
+                    return from_json(result['result'], SsvcEvaluationResult)
+        else:
+            with Db() as db:
+                db.execute('DELETE FROM ssvc_results WHERE cve_id=%s', (cve_id,))
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = dict(executor.map(lambda x: (x[0], x[1].aggregate(cve_id)), self._aggregators.items()))
+            results = dict(
+                executor.map(lambda x: (x[0], x[1].aggregate(cve_id, reevaluate)), self._aggregators.items()))
 
         if results is None or any(r is None for r in results.values()):
             print('One of them is none')

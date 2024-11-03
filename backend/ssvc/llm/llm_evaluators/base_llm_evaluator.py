@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from abc import abstractmethod
 from typing import Literal, Optional
@@ -17,16 +18,24 @@ class BaseLlmEvaluator:
         self._llm_client: LlmClient = GeminiLlmClient() if llm == 'gemini' else OpenaiLlmClient()
         self._cve_data_source_aggregator = CveDataSourceAggregator()
 
-    def evaluate(self, cve_id: str) -> Optional[dict]:
+    def evaluate(self, cve_id: str, reevaluate: bool = False) -> Optional[dict]:
         cve_id = cve_id.upper()
 
-        with Db() as db:
-            cached_data = db.first(
-                'SELECT * FROM llm_evaluator_cache WHERE llm = %s AND cve_id = %s AND decision_point = %s',
-                (self._llm, cve_id, self._name))
+        if not reevaluate:
+            with Db() as db:
+                cached_data = db.first(
+                    'SELECT * FROM llm_evaluator_cache WHERE llm = %s AND cve_id = %s AND decision_point = %s',
+                    (self._llm, cve_id, self._name))
 
-        if cached_data is not None:
-            return json.loads(cached_data['data'])
+            if cached_data is not None:
+                return json.loads(cached_data['data'])
+
+            logging.info(f'No cached evaluation was found for cve {cve_id}, running llm evaluator.')
+
+        else:
+            with Db() as db:
+                db.execute('DELETE FROM llm_evaluator_cache WHERE llm = %s AND cve_id = %s AND decision_point = %s',
+                           (self._llm, cve_id, self._name))
 
         cve_data = self._get_cve_data(cve_id)
 

@@ -7,10 +7,10 @@ from ssvc.evaluation_units.technical_impact.base_technical_impact_evaluation_uni
 
 class VulnrichmentTechnicalImpactEvaluationUnit(BaseTechnicalImpactEvaluationUnit):
 
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[EvaluationResult]:
         data_source = CisaVulnrichmentCveDataSource()
 
-        result = data_source.load(cve_id)
+        result = data_source.load(cve_id, reevaluate)
         if result is None:
             return None
 

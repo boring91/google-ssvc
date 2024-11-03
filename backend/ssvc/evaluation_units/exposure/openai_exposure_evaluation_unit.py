@@ -6,9 +6,9 @@ from ssvc.llm.llm_evaluators.exposure_llm_evaluator import ExposureLlmEvaluator
 
 
 class OpenaiExposureEvaluationUnit(BaseExposureEvaluationUnit):
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[EvaluationResult]:
         llm_evaluator = ExposureLlmEvaluator('openai')
-        result = llm_evaluator.evaluate(cve_id)
+        result = llm_evaluator.evaluate(cve_id, reevaluate)
 
         if result is None:
             return None

@@ -6,10 +6,10 @@ from ssvc.llm.llm_evaluators.mission_impact_llm_evaluator import MissionImpactLl
 
 
 class GeminiMissionImpactEvaluationUnit(BaseMissionImpactEvaluationUnit):
-    def _process_evaluation(self, cve_id: str) -> Optional[
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[
         EvaluationResult]:
         llm_evaluator = MissionImpactLlmEvaluator('gemini')
-        result = llm_evaluator.evaluate(cve_id)
+        result = llm_evaluator.evaluate(cve_id, reevaluate)
 
         if result is None:
             return None

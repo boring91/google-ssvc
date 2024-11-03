@@ -29,9 +29,9 @@ class EvaluationUnit:
         'public_wellbeing']:
         pass
 
-    def evaluate(self, cve_id: str) -> Optional[EvaluationResult]:
-        return self._process_evaluation(cve_id.upper())
+    def evaluate(self, cve_id: str, reevaluate: bool = False) -> Optional[EvaluationResult]:
+        return self._process_evaluation(cve_id.upper(), reevaluate)
 
     @abstractmethod
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[EvaluationResult]:
         pass

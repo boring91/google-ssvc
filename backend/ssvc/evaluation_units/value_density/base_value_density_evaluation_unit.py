@@ -10,5 +10,5 @@ class BaseValueDensityEvaluationUnit(EvaluationUnit):
         return 'value_density'
 
     @abstractmethod
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[EvaluationResult]:
         pass

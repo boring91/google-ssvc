@@ -1,4 +1,4 @@
-from typing import Optional, Literal
+from typing import Optional
 
 from app.data_sources.nist_cve_data_source import NistCveDataSource
 from ssvc.evaluation_units.evaluation_unit import EvaluationResult
@@ -8,7 +8,7 @@ from ssvc.utils import extract_cvss_from_nist, standardize_cvss
 
 class HeuristicValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
 
-    def _process_evaluation(self, cve_id: str) -> Optional[EvaluationResult]:
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[EvaluationResult]:
         """
         Value density:
         IF Attack Vector (AV) is Network (AV:N)
@@ -31,7 +31,7 @@ class HeuristicValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
         """
 
         data_source = NistCveDataSource()
-        data = data_source.load(cve_id)
+        data = data_source.load(cve_id, reevaluate)
         cvss = extract_cvss_from_nist(data)
 
         if cvss is None:
