@@ -85,7 +85,7 @@ export class AppComponent {
                             status: err.status || 500,
                             message:
                                 'An unexpected error occurred while evaluating the CVE.',
-                            details: err.error?.message || err.message,
+                            details: err.error?.detail || err.detail,
                         };
                     }
 

@@ -46,6 +46,8 @@ class CisaVulnrichmentCveDataSource(CveDataSource):
         year_url = f'{repo_root_url}/{year}'
         year_level = requests.get(year_url, headers=headers).json()
         group = next((x for x in year_level if sub_id.startswith(x['name'].replace('x', ''))), None)
+        if group is None:
+            return None
 
         # Load the cve data from the group
         cve_url = f'{year_url}/{group["name"]}/{cve_id}.json'
