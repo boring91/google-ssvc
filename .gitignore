@@ -444,4 +444,4 @@ typings
 .DS_Store
 Thumbs.db
 
-web/.angular/
+.angular
