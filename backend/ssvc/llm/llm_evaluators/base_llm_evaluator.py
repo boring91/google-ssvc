@@ -91,7 +91,10 @@ class BaseLlmEvaluator:
         json data but rather talks about the information that led you to this conclusion, aka, avoid saying the json 
         data shows etc. Also avoid giving generic descriptions like: "multiple sources have reported etc." but rather 
         provide concrete descriptions: e.g., name the sources, name the versions or software, provide links if 
-        available, etc.), and 4) "confidence": ranges between 0 and 1, which indicates how confident you are in your 
+        available, etc. In addition the style of the assessment should be passive for instance, rather than saying "I am
+        unable to find any information about this vulnerability", you should say "No information was found about this 
+        vulnerability", you do not have to use those exact same words but you should not use "I"), 
+        and 4) "confidence": ranges between 0 and 1, which indicates how confident you are in your 
         assessment, 1 being very confident.
 
         You should only respond with the json object nothing more.

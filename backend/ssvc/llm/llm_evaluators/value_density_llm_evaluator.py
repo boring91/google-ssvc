@@ -10,12 +10,12 @@ class ValueDensityLlmEvaluator(BaseLlmEvaluator):
         return "What is the Value Density of the given CVE? In other words, the concentration of value in the target?"
 
     def _get_description(self) -> str:
-        return """Your assessment should be either "diffuse" or "concentrated". Your assessment methodology should 
+        return """Your assessment should be either "diffused" or "concentrated". Your assessment methodology should 
         follow these rules:
-            - You should assess a CVE with "diffuse" if:
+            - You should assess a CVE with "diffused" if:
                 * The system that contains the vulnerable component has limited resources. That is, the resources that 
                 the adversary will gain control over with a single exploitation event are relatively small. Examples of 
-                systems with diffuse value are email accounts, most consumer online banking accounts, common cell 
+                systems with diffused value are email accounts, most consumer online banking accounts, common cell 
                 phones, and most personal computing resources owned and maintained by users.
                 
             - You should assess a CVE with "concentrated" if:

@@ -16,7 +16,7 @@ class HeuristicValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
             AND (Confidentiality Impact (VC) is High (VC:H)
                 OR Integrity Impact (VI) is High (VI:H)
                 OR Availability Impact (VA) is High (VA:H))
-            THEN Value Density = Centralized
+            THEN Value Density = Concentrated
 
         ELSE IF Attack Vector (AV) is Local (AV:L) or Adjacent (AV:A)
             OR Privileges Required (PR) is Low or High (PR:L or PR:H)
@@ -24,7 +24,7 @@ class HeuristicValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
             THEN Value Density = Diffused
 
         ELSE IF Scope (S) is Changed (S:C)
-            THEN Value Density = Centralized
+            THEN Value Density = Concentrated
 
         ELSE
             Value Density = Diffused
@@ -40,12 +40,12 @@ class HeuristicValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
         cvss = standardize_cvss(cvss)
 
         if 'AV:N' in cvss and 'PR:N' in cvss and ('VC:H' in cvss or 'VI:H' in cvss or 'VA:H' in cvss):
-            return EvaluationResult('centralized', 1, 'Rule-based heuristic evaluation.')
+            return EvaluationResult('concentrated', 1, 'Rule-based heuristic evaluation.')
 
         if 'AV:L' in cvss or 'AV:A' in cvss or 'PR:L' in cvss or 'PR:H' in cvss or 'UI:R' in cvss:
             return EvaluationResult('diffused', 1, 'Rule-based heuristic evaluation.')
 
         if 'S:C' in cvss:
-            return EvaluationResult('centralized', 1, 'Rule-based heuristic evaluation.')
+            return EvaluationResult('concentrated', 1, 'Rule-based heuristic evaluation.')
 
         return EvaluationResult('diffused', 1, 'Rule-based heuristic evaluation.')

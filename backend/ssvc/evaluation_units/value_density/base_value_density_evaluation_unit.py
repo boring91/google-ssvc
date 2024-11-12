@@ -6,7 +6,15 @@ from ssvc.evaluation_units.evaluation_unit import EvaluationUnit, EvaluationResu
 
 class BaseValueDensityEvaluationUnit(EvaluationUnit):
     @staticmethod
-    def type() -> Literal['centralized', 'diffused', 'technical_impact', 'value_density']:
+    def type() -> Literal[
+        'state_of_exploitation',
+        'automatability',
+        'technical_impact',
+        'value_density',
+        'exposure',
+        'mission_impact',
+        'mission_prevalence',
+        'public_wellbeing']:
         return 'value_density'
 
     @abstractmethod
