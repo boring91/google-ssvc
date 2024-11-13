@@ -1,8 +1,9 @@
-from typing import Optional, Literal
+from typing import Optional
 
 from app.data_sources.cisa_vulnrichment_cve_data_source import CisaVulnrichmentCveDataSource
 from ssvc.evaluation_units.evaluation_unit import EvaluationResult
-from ssvc.evaluation_units.technical_impact.base_technical_impact_evaluation_unit import BaseTechnicalImpactEvaluationUnit
+from ssvc.evaluation_units.technical_impact.base_technical_impact_evaluation_unit import \
+    BaseTechnicalImpactEvaluationUnit
 
 
 class VulnrichmentTechnicalImpactEvaluationUnit(BaseTechnicalImpactEvaluationUnit):
@@ -14,4 +15,8 @@ class VulnrichmentTechnicalImpactEvaluationUnit(BaseTechnicalImpactEvaluationUni
         if result is None:
             return None
 
-        return EvaluationResult(result['technical_impact'], 1, 'Found in the CISA Vulnrichment data set.')
+        return EvaluationResult(
+            result['technical_impact'],
+            1,
+            'Found in the CISA Vulnrichment data set.',
+            [result['link']])

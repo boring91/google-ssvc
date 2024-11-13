@@ -85,7 +85,7 @@ class BaseLlmEvaluator:
         
         {self._get_description()}
         
-        You answer should be formatted as a json object with two properties: 1) "cve_id" which contains the id of the 
+        You answer should be formatted as a json object with five properties: 1) "cve_id" which contains the id of the 
         cve in question, 2) "assessment" which holds your final assessment of the CVE, 3) "justification": explaining 
         how you reached to the answer you provided in the "assessment" property (the description should not refer to the 
         json data but rather talks about the information that led you to this conclusion, aka, avoid saying the json 
@@ -93,9 +93,10 @@ class BaseLlmEvaluator:
         provide concrete descriptions: e.g., name the sources, name the versions or software, provide links if 
         available, etc. In addition the style of the assessment should be passive for instance, rather than saying "I am
         unable to find any information about this vulnerability", you should say "No information was found about this 
-        vulnerability", you do not have to use those exact same words but you should not use "I"), 
-        and 4) "confidence": ranges between 0 and 1, which indicates how confident you are in your 
-        assessment, 1 being very confident.
+        vulnerability", you do not have to use those exact same words but you should not use "I"), 4) "confidence": 
+        ranges between 0 and 1, which indicates how confident you are in your assessment, 1 being very confident, and 
+        5) "links": which is an array that contains the related links to the assessment (if any) that support your 
+        justification.
 
         You should only respond with the json object nothing more.
 

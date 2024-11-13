@@ -44,7 +44,7 @@ export const assessmentStyles: Record<string, Record<string, string>> = {
         total: 'bg-red-500/20 text-red-300',
     },
     valueDensity: {
-        centralized: 'bg-yellow-500/20 text-yellow-300',
+        concentrated: 'bg-yellow-500/20 text-yellow-300',
         diffused: 'bg-green-500/20 text-green-300',
     },
 } as const;

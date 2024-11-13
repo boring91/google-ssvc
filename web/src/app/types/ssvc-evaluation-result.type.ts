@@ -11,5 +11,5 @@ export type SsvcEvaluationResult = {
     missionPrevalence: EvaluationResult<'minimal' | 'support' | 'essential'>;
     publicWellbeing: EvaluationResult<'minimal' | 'material' | 'irreversible'>;
     technicalImpact: EvaluationResult<'partial' | 'total'>;
-    valueDensity: EvaluationResult<'centralized' | 'diffused'>;
+    valueDensity: EvaluationResult<'concentrated' | 'diffused'>;
 };

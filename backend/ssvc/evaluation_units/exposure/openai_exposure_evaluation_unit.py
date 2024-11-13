@@ -13,4 +13,4 @@ class OpenaiExposureEvaluationUnit(BaseExposureEvaluationUnit):
         if result is None:
             return None
 
-        return EvaluationResult(result['assessment'], result['confidence'], result['justification'])
+        return EvaluationResult(result['assessment'], result['confidence'], result['justification'], result['links'])

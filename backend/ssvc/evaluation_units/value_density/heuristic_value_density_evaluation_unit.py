@@ -40,12 +40,24 @@ class HeuristicValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
         cvss = standardize_cvss(cvss)
 
         if 'AV:N' in cvss and 'PR:N' in cvss and ('VC:H' in cvss or 'VI:H' in cvss or 'VA:H' in cvss):
-            return EvaluationResult('concentrated', 1, 'Rule-based heuristic evaluation.')
+            return EvaluationResult(
+                'concentrated',
+                1,
+                'Rule-based heuristic evaluation using the cvss vector string.',
+                [])
 
         if 'AV:L' in cvss or 'AV:A' in cvss or 'PR:L' in cvss or 'PR:H' in cvss or 'UI:R' in cvss:
-            return EvaluationResult('diffused', 1, 'Rule-based heuristic evaluation.')
+            return EvaluationResult(
+                'diffused',
+                1,
+                'Rule-based heuristic evaluation using the cvss vector string.',
+                [])
 
         if 'S:C' in cvss:
-            return EvaluationResult('concentrated', 1, 'Rule-based heuristic evaluation.')
+            return EvaluationResult(
+                'concentrated',
+                1,
+                'Rule-based heuristic evaluation using the cvss vector string.',
+                [])
 
-        return EvaluationResult('diffused', 1, 'Rule-based heuristic evaluation.')
+        return EvaluationResult('diffused', 1, 'Rule-based heuristic evaluation using the cvss vector string.', [])

@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 
 
 @dataclass
@@ -8,6 +8,7 @@ class EvaluationResult:
     assessment: str
     confidence: float
     justification: str
+    links: List[str]
 
 
 class EvaluationUnit:

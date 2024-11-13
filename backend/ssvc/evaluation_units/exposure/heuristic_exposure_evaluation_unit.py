@@ -29,12 +29,12 @@ class HeuristicExposureEvaluationUnit(BaseExposureEvaluationUnit):
         cvss = standardize_cvss(cvss)
 
         if 'AV:N' in cvss and 'PR:N' and 'UI:N':
-            return EvaluationResult('open', 1, 'Rule-based heuristic evaluation.')
+            return EvaluationResult('open', 1, 'Rule-based heuristic evaluation using the CVSS vector.', [])
 
         if ('AV:N' in cvss or 'AV:A' in cvss) and ('PR:L' in cvss or 'PR:H' in cvss or 'UI:R' in cvss):
-            return EvaluationResult('controlled', 1, 'Rule-based heuristic evaluation.')
+            return EvaluationResult('controlled', 1, 'Rule-based heuristic evaluation using the CVSS vector.', [])
 
         if 'AV:L' in cvss or 'AV:P' in cvss:
-            return EvaluationResult('small', 1, 'Rule-based heuristic evaluation.')
+            return EvaluationResult('small', 1, 'Rule-based heuristic evaluation using the CVSS vector.', [])
 
         return None

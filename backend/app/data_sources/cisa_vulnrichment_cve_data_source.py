@@ -93,6 +93,7 @@ class CisaVulnrichmentCveDataSource(CveDataSource):
 
                 options = content['options']
                 result = {list(item.keys())[0].lower().replace(' ', '_'): list(item.values())[0] for item in options}
+                result['link'] = cve_url
                 return result
 
         return None

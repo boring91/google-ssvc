@@ -1,10 +1,16 @@
 <div class="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-lg p-4 space-y-3">
+  <!-- Title & assessment -->
   <div class="flex items-center justify-between">
+    <!-- Title -->
     <h3 class="text-gray-300 font-medium">{{ title() }}</h3>
+
+    <!-- Assessment -->
     <span [class]="badgeClass" class="px-3 py-1 rounded-full text-sm">
                     {{ formatAssessment($any(result().assessment)) }}
                 </span>
   </div>
+
+  <!-- Confidence -->
   <div class="flex items-center gap-2">
     <span class="text-xs text-gray-500">Confidence:</span>
     <div class="flex-1 bg-slate-700/50 rounded-full h-1.5">
@@ -13,5 +19,16 @@
       </div>
     </div>
   </div>
+
+  <!-- Justification -->
   <p class="text-sm text-gray-400">{{ result().justification }}</p>
+
+  <ul class="text-xs text-gray-500 flex flex-col gap-1">
+    @for (link of result().links; track link) {
+      <li class="flex flex-row items-start gap-2">
+        <span>&bullet;</span>
+        <a class="text-gray-500" target="_blank" href="{{link}}">{{ link }}</a>
+      </li>
+    }
+  </ul>
 </div>

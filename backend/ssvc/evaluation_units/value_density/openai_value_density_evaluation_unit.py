@@ -1,4 +1,4 @@
-from typing import Optional, Literal
+from typing import Optional
 
 from ssvc.evaluation_units.evaluation_unit import EvaluationResult
 from ssvc.evaluation_units.value_density.base_value_density_evaluation_unit import BaseValueDensityEvaluationUnit
@@ -13,4 +13,4 @@ class OpenaiValueDensityEvaluationUnit(BaseValueDensityEvaluationUnit):
         if result is None:
             return None
 
-        return EvaluationResult(result['assessment'], result['confidence'], result['justification'])
+        return EvaluationResult(result['assessment'], result['confidence'], result['justification'], result['links'])
