@@ -11,7 +11,7 @@ class CisaKevCveDataSource(CveDataSource):
 
     @staticmethod
     def name() -> str:
-        return 'cisa_kev'
+        return 'kev'
 
     def _load_data(self, cve_id: str) -> Optional[dict]:
         url = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'

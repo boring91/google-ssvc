@@ -16,10 +16,48 @@ def _is_int(s):
         return False
 
 
+def extract_data_from_vulnrichment_json(cve_json: dict, cve_url: str) -> Optional[dict]:
+    if 'containers' not in cve_json:
+        return None
+
+    containers = cve_json['containers']
+    if 'adp' not in containers:
+        return None
+
+    adp: List = containers['adp']
+    if len(adp) == 0:
+        return None
+
+    for adp_item in adp:
+        if 'metrics' not in adp_item:
+            continue
+
+        metrics: List = adp_item['metrics']
+        if len(metrics) == 0:
+            continue
+
+        for metrics_item in metrics:
+            if 'other' not in metrics_item:
+                continue
+
+            other = metrics_item['other']
+            if 'content' not in other or 'type' not in other or other['type'] != 'ssvc':
+                continue
+
+            content = other['content']
+            if 'options' not in content:
+                return None
+
+            options = content['options']
+            result = {list(item.keys())[0].lower().replace(' ', '_'): list(item.values())[0] for item in options}
+            result['link'] = cve_url
+            return result
+
+
 class CisaVulnrichmentCveDataSource(CveDataSource):
     @staticmethod
     def name() -> str:
-        return 'cisa'
+        return 'vulnrichment'
 
     def _load_data(self, cve_id: str) -> Optional[dict]:
         tokens = cve_id.split('-')
@@ -57,43 +95,5 @@ class CisaVulnrichmentCveDataSource(CveDataSource):
             return None
 
         cve_level = cve_response.json()
-        cve_data = json.loads(base64.b64decode(cve_level['content']).decode('utf-8'))
-
-        # Search for the data of interest
-        if 'containers' not in cve_data:
-            return None
-
-        containers = cve_data['containers']
-        if 'adp' not in containers:
-            return None
-
-        adp: List = containers['adp']
-        if len(adp) == 0:
-            return None
-
-        for adp_item in adp:
-            if 'metrics' not in adp_item:
-                continue
-
-            metrics: List = adp_item['metrics']
-            if len(metrics) == 0:
-                continue
-
-            for metrics_item in metrics:
-                if 'other' not in metrics_item:
-                    continue
-
-                other = metrics_item['other']
-                if 'content' not in other or 'type' not in other or other['type'] != 'ssvc':
-                    continue
-
-                content = other['content']
-                if 'options' not in content:
-                    return None
-
-                options = content['options']
-                result = {list(item.keys())[0].lower().replace(' ', '_'): list(item.values())[0] for item in options}
-                result['link'] = cve_url
-                return result
-
-        return None
+        cve_json = json.loads(base64.b64decode(cve_level['content']).decode('utf-8'))
+        return extract_data_from_vulnrichment_json(cve_json, cve_url)

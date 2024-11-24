@@ -10,6 +10,8 @@ class CveDataSource:
     def __init__(self):
         self._source_name = self.__class__.name()
 
+        self._logger = logging.getLogger(self.__class__.__name__)
+
     def load(self, cve_id: str, reload: bool = False) -> Optional[dict]:
         cve_id = cve_id.upper()
         if not reload:
@@ -20,7 +22,7 @@ class CveDataSource:
             if cached_data is not None:
                 return json.loads(cached_data['data'])
 
-            logging.info(f'No cached data was found for cve {cve_id}, loading from data source.')
+            self._logger.info(f'No cached data was found for cve {cve_id}, loading from data source.')
 
         else:
             with Db() as db:

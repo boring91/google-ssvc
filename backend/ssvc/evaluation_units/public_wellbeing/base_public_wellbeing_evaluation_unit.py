@@ -18,6 +18,5 @@ class BasePublicWellbeingEvaluationUnit(EvaluationUnit):
         return 'public_wellbeing'
 
     @abstractmethod
-    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[
-        EvaluationResult]:
+    def _process_evaluation(self, cve_id: str, reevaluate: bool) -> Optional[EvaluationResult]:
         pass

@@ -103,6 +103,9 @@ class SsvcScoreEvaluator:
 
         if results is None or any(r is None for r in results.values()):
             print('One of them is none')
+            if results is not None:
+                for r in results:
+                    print(r, results[r])
             return None
 
         print()

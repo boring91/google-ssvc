@@ -1,45 +1,31 @@
 import concurrent.futures
-from elasticsearch import Elasticsearch
-import requests
 from datetime import datetime
+from typing import Literal
+
+from elasticsearch import Elasticsearch
 from lxml import html
-import time
-import logging
 
-from requests.adapters import HTTPAdapter
-from urllib3 import Retry
+from base_scraper import BaseScraper
 
 
-class SecurityMailingScraper:
+class OpenWallScraper(BaseScraper):
     def __init__(
             self,
+            source: Literal['oss-security', 'bugtraq', 'full-disclosure'],
             elasticsearch_url: str = 'http://localhost:9200',
-            index_name: str = 'security-blogs'):
+            index_name: str = 'security-blogs',
+            create_index: bool = False):
+        super().__init__()
+        self._source = source
         self._es = Elasticsearch(elasticsearch_url)
         self._index_name = index_name
-        # self._base_url = 'https://www.openwall.com/lists/oss-security'
-        # self._base_url = 'https://lists.openwall.net/bugtraq'
-        self._base_url = 'https://lists.openwall.net/full-disclosure'
-
-        self._session = requests.Session()
-        adapter = HTTPAdapter(
-            pool_connections=50,  # Number of connection objects to keep in pool
-            pool_maxsize=100,  # Maximum number of connections to keep in pool
-            max_retries=Retry(
-                total=3,
-                backoff_factor=1,
-                status_forcelist=[500, 502, 503, 504]
-            )
-        )
-        self._session.mount('http://', adapter)
-        self._session.mount('https://', adapter)
-
-        # Configure logging
-        logging.basicConfig(level=logging.INFO)
-        self._logger = logging.getLogger(__name__)
+        self._base_url = 'https://www.openwall.com/lists/oss-security' if source == 'oss-security' \
+            else 'https://lists.openwall.net/bugtraq' if source == 'bugtraq' \
+            else 'https://lists.openwall.net/full-disclosure'
 
         # Initialize index
-        # self._setup_index()
+        if create_index:
+            self._setup_index()
 
     def _setup_index(self):
         """Setup Elasticsearch index with proper mappings"""
@@ -64,19 +50,6 @@ class SecurityMailingScraper:
             mappings=mappings
         )
 
-    def _make_request(self, url: str, max_retries: int = 3) -> requests.Response:
-        """Make HTTP request with retry logic"""
-        for attempt in range(max_retries):
-            try:
-                response = self._session.get(url, timeout=10)
-                response.raise_for_status()
-                return response
-            except requests.RequestException as e:
-                if attempt == max_retries - 1:
-                    self._logger.error(f"Failed to fetch {url} after {max_retries} attempts: {e}")
-                    raise
-                time.sleep(1 * (attempt + 1))  # Exponential backoff
-
     def _scrape_item(self, year: str, month: str, day: str, item: str):
         """Scrape individual mail item"""
         url = f'{self._base_url}/{year}{month}{day}{item}'
@@ -90,9 +63,7 @@ class SecurityMailingScraper:
                 'month': int(month[:-1]),
                 'day': int(day[:-1]),
                 'timestamp': datetime.utcnow(),
-                # 'source': 'oss-security',
-                # 'source': 'bugtraq',
-                'source': 'full-disclosure',
+                'source': self._source,
                 'source_type': 'mailing_list',
                 'url': url,
                 'content': content
@@ -173,8 +144,3 @@ class SecurityMailingScraper:
 
         except Exception as e:
             self._logger.error(f"Error in main scraping process: {e}")
-
-
-if __name__ == "__main__":
-    scraper = SecurityMailingScraper()
-    scraper.scrape(max_years=1)  # Scrape only the most recent year

@@ -6,8 +6,6 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from psycopg2 import pool
 
-logging.basicConfig(level=logging.INFO)
-
 
 class Db:
     # Initialize a connection pool
@@ -19,6 +17,9 @@ class Db:
         host=os.getenv('DB_HOST'),
         port=os.getenv('DB_PORT')
     )
+
+    def __init__(self):
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def __enter__(self):
         # Get a connection from the pool
@@ -36,12 +37,12 @@ class Db:
                 data: Optional[Union[Tuple, list]] = None) -> None:
         data = data or ()
         try:
-            logging.info(f"Executing query: {query} with data: {data}")
+            self._logger.info(f"Executing query: {query} with data: {data}")
             self._cur.execute(query, data)
             self._conn.commit()
         except Exception as e:
             self._conn.rollback()
-            logging.error(f"Error executing query: {e}")
+            self._logger.error(f"Error executing query: {e}")
             raise
 
     def first(self,
@@ -49,12 +50,12 @@ class Db:
               data: Optional[Union[Tuple, list]] = None) -> Optional[dict]:
         data = data or ()
         try:
-            logging.info(f"Fetching first result for query: {query} with data: {data}")
+            self._logger.info(f"Fetching first result for query: {query} with data: {data}")
             self._cur.execute(query, data)
             result = self._cur.fetchone()
             return dict(result) if result else None
         except Exception as e:
-            logging.error(f"Error fetching first result: {e}")
+            self._logger.error(f"Error fetching first result: {e}")
             raise
 
     def query(self, query: str,
@@ -62,7 +63,7 @@ class Db:
               index_column: Optional[str] = 'id') -> pd.DataFrame:
         data = data or ()
         try:
-            logging.info(f"Fetching query: {query} with data: {data}")
+            self._logger.info(f"Fetching query: {query} with data: {data}")
             self._cur.execute(query, data)
             results = self._cur.fetchall()
             df = pd.DataFrame(results)
@@ -72,30 +73,30 @@ class Db:
 
             return df
         except Exception as e:
-            logging.error(f"Error executing query and fetching results: {e}")
+            self._logger.error(f"Error executing query and fetching results: {e}")
             raise
 
     # Transaction management methods
     def begin(self):
         """Start a transaction."""
         self._conn.autocommit = False
-        logging.info("Transaction started")
+        self._logger.info("Transaction started")
 
     def commit(self):
         """Commit the current transaction."""
         try:
             self._conn.commit()
-            logging.info("Transaction committed")
+            self._logger.info("Transaction committed")
         except Exception as e:
             self._conn.rollback()
-            logging.error(f"Error during commit: {e}")
+            self._logger.error(f"Error during commit: {e}")
             raise
 
     def rollback(self):
         """Rollback the current transaction."""
         try:
             self._conn.rollback()
-            logging.info("Transaction rolled back")
+            self._logger.info("Transaction rolled back")
         except Exception as e:
-            logging.error(f"Error during rollback: {e}")
+            self._logger.error(f"Error during rollback: {e}")
             raise

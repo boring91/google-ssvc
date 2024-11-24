@@ -18,6 +18,8 @@ class BaseLlmEvaluator:
         self._llm_client: LlmClient = GeminiLlmClient() if llm == 'gemini' else OpenaiLlmClient()
         self._cve_data_source_aggregator = CveDataSourceAggregator()
 
+        self._logger = logging.getLogger(self.__class__.__name__)
+
     def evaluate(self, cve_id: str, reevaluate: bool = False) -> Optional[dict]:
         cve_id = cve_id.upper()
 
@@ -30,7 +32,7 @@ class BaseLlmEvaluator:
             if cached_data is not None:
                 return json.loads(cached_data['data'])
 
-            logging.info(f'No cached evaluation was found for cve {cve_id}, running llm evaluator.')
+            self._logger.info(f'No cached evaluation was found for cve {cve_id}, running llm evaluator.')
 
         else:
             with Db() as db:
@@ -43,12 +45,18 @@ class BaseLlmEvaluator:
 
         try:
             llm_response = self._llm_client.respond(query)
-        except:
+        except Exception as e:
+            self._logger.error(f'An error occurred while fetching llm response. {e}')
             return None
+
+        print('mnm: llm response:')
+        print(llm_response)
+        print()
 
         parsed_response = _parse_llm_response(llm_response)
 
         if parsed_response is None:
+            self._logger.warning(f'Llm response could not be parsed.')
             return None
 
         # Cache the response
@@ -113,7 +121,7 @@ class BaseLlmEvaluator:
 
 def _parse_llm_response(llm_response: str) -> Optional[dict]:
     cleaned = llm_response.replace('\n', '').replace('\t', '')
-    pattern = r'```json(\{.+?\})```'
+    pattern = r'(?:```json)?(\{.+?\})(?:```)?'
     match = re.search(pattern, cleaned)
 
     if match:
