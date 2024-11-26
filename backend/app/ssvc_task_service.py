@@ -44,26 +44,68 @@ class Task:
                 for _, r in df.iterrows() if r['result_created_time'] is not None
             ]
 
+            # Order based on action severity
+            results = sorted(results, key=lambda x: (x.result is None,
+                                                     {'act': 0, 'attend': 1, 'track*': 2, 'track': 3}.get(
+                                                         x.result.action if x.result else 'track', 4), x.created_time))
+
+        # Order the cve list inside the data to match the
+        # results.
+        if 'data' in first and len(results) > 0:
+            sorted_tasks = sorted(results,
+                                  key=lambda x: (x.result is None,
+                                                 {'act': 0, 'attend': 1, 'track*': 2, 'track': 3}.get(
+                                                     x.result.action if x.result else 'track', 4),
+                                                 x.created_time))
+
+            # Create a mapping of CVE positions based on sorted task_results
+            cve_order = {task.cve_id: idx for idx, task in enumerate(sorted_tasks)}
+
+            # Sort CVEs: first the ones in task_results (by their order), then the rest
+            data = sorted(first['data'], key=lambda cve: cve_order.get(cve, float('inf')))
+
+        elif 'data' in first:
+            data = first['data']
+
+        else:
+            data = None
+
         return cls(
             first['id'], first['created_time'], first['modified_time'],
-            first['status'], None if 'data' not in first else first['data'], results
+            first['status'], data, results
         )
 
     @classmethod
-    def from_tasks_dataframe(cls, df: pd.DataFrame) -> List['Task']:
+    def from_tasks_dataframe(cls,
+                             df: pd.DataFrame,
+                             order_by: Optional[str] = None,
+                             ascending: bool = True) -> List['Task']:
         """
         Convert a dataframe containing multiple tasks into a list of Task instances.
         Each task and its associated results are grouped by task ID.
+        Tasks can be ordered by a specified column in ascending or descending order.
 
         Args:
             df: DataFrame containing one or more tasks with their results
+            order_by: Optional column name to sort tasks by. If None, maintains DataFrame order.
+            ascending: Sort order direction. True for ascending, False for descending.
+                      Only used if order_by is specified.
 
         Returns:
-            List[Task]: List of Task instances
+            List[Task]: List of Task instances in the specified order
         """
+        if order_by is not None:
+            if order_by not in df.columns:
+                raise ValueError(f"Column '{order_by}' not found in DataFrame")
+            # Get first occurrence of each task ID, ordered by the specified column
+            task_order = df.sort_values(order_by, ascending=ascending).drop_duplicates('id')['id']
+        else:
+            # Maintain original order using first occurrence of each task ID
+            task_order = df.drop_duplicates('id')['id']
+
         return [
-            cls.from_dataframe(group_df)
-            for _, group_df in df.groupby('id')
+            cls.from_dataframe(df[df['id'] == task_id])
+            for task_id in task_order
         ]
 
 
@@ -78,6 +120,8 @@ class SsvcTaskService:
                        t.status
                 FROM tasks t
                 WHERE t.type = 'ssvc_bulk_evaluation'
+                ORDER BY t.created_time DESC 
+                LIMIT 100
                 """,
                 index_column=None
             )
@@ -85,7 +129,7 @@ class SsvcTaskService:
         if len(data) == 0:
             return []
 
-        return Task.from_tasks_dataframe(data)
+        return Task.from_tasks_dataframe(data, 'created_time', False)
 
     def get(self, task_id: str) -> Optional[Task]:
         with Db() as db:
