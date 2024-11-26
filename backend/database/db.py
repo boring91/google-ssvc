@@ -4,6 +4,7 @@ import logging
 from typing import Optional, Tuple, Union
 import pandas as pd
 import psycopg2
+import pytz
 from psycopg2.extras import RealDictCursor
 from psycopg2 import pool
 
@@ -30,7 +31,7 @@ class Db:
 
     @classmethod
     def _init_pool(cls):
-        """Initialize the connection pool with robust connection parameters."""
+        """Initialize the connection pool with timezone awareness."""
         connect_params = {
             'dbname': os.getenv('DB_NAME'),
             'user': os.getenv('DB_USER'),
@@ -38,12 +39,13 @@ class Db:
             'host': os.getenv('DB_HOST'),
             'port': os.getenv('DB_PORT'),
             'connect_timeout': 10,
-            'gssencmode': 'disable',  # Disable Kerberos authentication
+            'gssencmode': 'disable',
             'keepalives': 1,
             'keepalives_idle': 30,
             'keepalives_interval': 10,
             'keepalives_count': 5,
-            'application_name': 'your_app_name'
+            'application_name': 'ssvc',
+            'options': '-c timezone=UTC'
         }
 
         try:
@@ -74,11 +76,12 @@ class Db:
             try:
                 self._conn = self._pool.getconn()
 
-                # Validate connection is still alive
+                # Set timezone to UTC for this connection
                 with self._conn.cursor() as test_cur:
                     test_cur.execute('SELECT 1')
 
                 self._cur = self._conn.cursor(cursor_factory=RealDictCursor)
+                self._cur.execute("SET timezone TO 'UTC'")
                 return self
 
             except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
@@ -86,7 +89,7 @@ class Db:
                 retry_count -= 1
                 self._logger.warning(f"Connection attempt failed, retries left: {retry_count}", exc_info=True)
 
-                # If we got a connection but it was bad, return it to the pool
+                # If we got a connection, but it was bad, return it to the pool
                 if self._conn is not None:
                     # noinspection PyBroadException
                     try:
@@ -171,7 +174,7 @@ class Db:
             self._logger.info(f"Fetching first result for query: {query} with data: {data}")
             self._cur.execute(query, data)
             result = self._cur.fetchone()
-            return dict(result) if result else None
+            return self._process_row(dict(result)) if result else None
         except Exception as e:
             self._logger.error(f"Error fetching first result: {e}")
             raise
@@ -195,7 +198,10 @@ class Db:
             self._logger.info(f"Fetching query: {query} with data: {data}")
             self._cur.execute(query, data)
             results = self._cur.fetchall()
-            df = pd.DataFrame(results)
+
+            # Process each row for timezone handling
+            processed_results = [self._process_row(dict(row)) for row in results]
+            df = pd.DataFrame(processed_results)
 
             if len(df) > 0 and index_column and index_column in df.columns:
                 df = df.set_index(index_column)
@@ -255,3 +261,22 @@ class Db:
             except:
                 # If cleanup fails, close everything
                 cls.close_all_connections()
+
+    @staticmethod
+    def _process_row(row: dict) -> Optional[dict]:
+        """Process a row to ensure proper timezone handling for datetime fields."""
+        if row is None:
+            return None
+
+        processed = {}
+        for key, value in row.items():
+            if isinstance(value, pd.Timestamp) or hasattr(value, 'tzinfo'):
+                # Ensure timezone aware and convert to UTC
+                if value.tzinfo is None:
+                    value = value.replace(tzinfo=pytz.UTC)
+                else:
+                    value = value.astimezone(pytz.UTC)
+                processed[key] = value
+            else:
+                processed[key] = value
+        return processed
