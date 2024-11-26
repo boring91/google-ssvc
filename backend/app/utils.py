@@ -1,28 +1,43 @@
 from dataclasses import asdict
-from typing import Optional
+from typing import Optional, Any, Union, Dict, List
 
 
-def dataclass_to_camelcase_dict(obj: Optional[any]) -> Optional[dict]:
+def dataclass_to_camelcase_dict(obj: Optional[Union[Any, Dict, List]]) -> Optional[Union[Dict, List]]:
     """
-    Convert a dataclass object to a dictionary with camelCase keys.
-    Handles nested dictionaries by recursively converting their keys as well.
+    Convert a dataclass object, dictionary, or list to a dictionary/list with camelCase keys.
+    Handles nested dictionaries and arrays by recursively converting their contents.
 
     Args:
-        obj: A dataclass instance or None. If None, returns None.
+        obj: A dataclass instance, dictionary, list, or None. If None, returns None.
 
     Returns:
-        Optional[dict]: A dictionary with all keys converted to camelCase,
-                       or None if the input is None.
+        Optional[Union[Dict, List]]: A dictionary/list with all keys converted to camelCase,
+                                   or None if the input is None.
 
     Examples:
         >>> @dataclass
+        >>> class Address:
+        >>>     postal_code: str
+        >>>
+        >>> @dataclass
         >>> class User:
         >>>     first_name: str
-        >>>     last_name: str
+        >>>     addresses: list[Address]
         >>>
-        >>> user = User(first_name="John", last_name="Doe")
+        >>> # Example with dataclass
+        >>> user = User(first_name="John", addresses=[Address(postal_code="12345")])
         >>> dataclass_to_camelcase_dict(user)
-        >>> {'firstName': 'John', 'lastName': 'Doe'}
+        >>> {'firstName': 'John', 'addresses': [{'postalCode': '12345'}]}
+        >>>
+        >>> # Example with dictionary
+        >>> data = {"first_name": "John", "postal_code": "12345"}
+        >>> dataclass_to_camelcase_dict(data)
+        >>> {'firstName': 'John', 'postalCode': '12345'}
+        >>>
+        >>> # Example with list
+        >>> data_list = [{"postal_code": "12345"}, {"postal_code": "67890"}]
+        >>> dataclass_to_camelcase_dict(data_list)
+        >>> [{'postalCode': '12345'}, {'postalCode': '67890'}]
     """
     if obj is None:
         return obj
@@ -44,27 +59,50 @@ def dataclass_to_camelcase_dict(obj: Optional[any]) -> Optional[dict]:
         components = snake_str.split('_')
         return components[0] + ''.join(x.title() for x in components[1:])
 
-    def convert_keys_to_camel_case(snake_dict: dict) -> dict:
+    def convert_keys_to_camel_case(data: Any) -> Any:
         """
-        Recursively convert all dictionary keys from snake_case to camelCase.
+        Recursively convert all dictionary keys from snake_case to camelCase,
+        including those in nested dictionaries and arrays.
 
         Args:
-            snake_dict: A dictionary with snake_case keys
+            data: Any data structure that might contain dictionaries or lists
 
         Returns:
-            dict: A new dictionary with all keys converted to camelCase,
-                 including keys in nested dictionaries
+            Any: The input data structure with all dictionary keys converted to camelCase
 
         Examples:
-            >>> convert_keys_to_camel_case({"first_name": "John", "address_info": {"postal_code": "12345"}})
-            >>> {"firstName": "John", "addressInfo": {"postalCode": "12345"}}
+            >>> convert_keys_to_camel_case({
+            >>>     "first_name": "John",
+            >>>     "addresses": [
+            >>>         {"postal_code": "12345"},
+            >>>         {"postal_code": "67890"}
+            >>>     ]
+            >>> })
+            >>> {
+            >>>     "firstName": "John",
+            >>>     "addresses": [
+            >>>         {"postalCode": "12345"},
+            >>>         {"postalCode": "67890"}
+            >>>     ]
+            >>> }
         """
-        camel_dict = {}
-        for key, value in snake_dict.items():
-            camel_key = snake_to_camel(key)
-            if isinstance(value, dict):
-                value = convert_keys_to_camel_case(value)
-            camel_dict[camel_key] = value
-        return camel_dict
+        if isinstance(data, dict):
+            return {
+                snake_to_camel(key): convert_keys_to_camel_case(value)
+                for key, value in data.items()
+            }
+        elif isinstance(data, list):
+            return [convert_keys_to_camel_case(item) for item in data]
+        return data
 
-    return convert_keys_to_camel_case(asdict(obj))
+    # If input is already a dict or list, convert it directly
+    if isinstance(obj, (dict, list)):
+        return convert_keys_to_camel_case(obj)
+
+    # Otherwise, try to convert it as a dataclass
+    try:
+        return convert_keys_to_camel_case(asdict(obj))
+    except (TypeError, AttributeError):
+        raise ValueError(
+            "Input must be a dataclass instance, dictionary, list, or None"
+        )

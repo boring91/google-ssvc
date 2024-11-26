@@ -10,8 +10,6 @@ class OpenaiLlmClient(LlmClient):
         self._client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
     def respond(self, query) -> str:
-        print('mnm')
-        print(query)
         completion = self._client.chat.completions.create(
             model="gpt-4o",
             messages=[

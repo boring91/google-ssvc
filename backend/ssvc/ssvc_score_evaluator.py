@@ -103,7 +103,6 @@ class SsvcScoreEvaluator:
                 executor.map(lambda x: (x[0], x[1].aggregate(cve_id, reevaluate)), self._aggregators.items()))
 
         if results is None or any(r is None for r in results.values()):
-            print('One of them is none')
             return None
 
         mission_prevalence_wellbeing = self._mission_prevalence_wellbeing_df.loc[
@@ -130,7 +129,7 @@ class SsvcScoreEvaluator:
         # Cache the result:
         result_id = str(uuid.uuid4())
         with Db() as db:
-            db.execute('INSERT INTO ssvc_results(id, cve_id, result) VALUES (%s, %s)',
+            db.execute('INSERT INTO ssvc_results(id, cve_id, result) VALUES (%s, %s, %s)',
                        (result_id, cve_id, json.dumps(asdict(result))))
 
         return result_id, result

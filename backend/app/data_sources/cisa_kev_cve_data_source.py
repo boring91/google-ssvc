@@ -16,7 +16,6 @@ class CisaKevCveDataSource(CveDataSource):
     def _load_data(self, cve_id: str) -> Optional[dict]:
         url = 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'
         response = requests.get(url)
-        print(response.content)
         db = response.json()
 
         vulnerabilities: List[dict] = db['vulnerabilities']

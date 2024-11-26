@@ -49,10 +49,6 @@ class BaseLlmEvaluator:
             self._logger.error(f'An error occurred while fetching llm response. {e}')
             return None
 
-        print('mnm: llm response:')
-        print(llm_response)
-        print()
-
         parsed_response = _parse_llm_response(llm_response)
 
         if parsed_response is None:

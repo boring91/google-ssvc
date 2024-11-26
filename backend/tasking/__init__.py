@@ -1,7 +1,8 @@
+import json
 import os
 import re
 import uuid
-from typing import Literal, List
+from typing import Literal, List, Optional
 
 from . import config
 
@@ -15,11 +16,12 @@ app = Celery(broker=f'pyamqp://guest@{os.getenv("RABBITMQ_HOST")}')
 
 def submit_task(
         task_type: Literal['ssvc_bulk_evaluation'],
-        *args) -> str:
+        args: List,
+        data: Optional[any] = None) -> str:
     with Db() as db:
         task_id = str(uuid.uuid4())
-        db.execute("INSERT INTO tasks(id, type) VALUES(%s, %s)",
-                   (task_id, task_type))
+        db.execute("INSERT INTO tasks(id, type, data) VALUES(%s, %s, %s)",
+                   (task_id, task_type, None if data is None else json.dumps(data)))
 
     if task_type == 'ssvc_bulk_evaluation':
         ssvc_bulk_evaluation.apply_async(args=args, task_id=task_id)
