@@ -1,0 +1,161 @@
+<div class="max-w-7xl mx-auto">
+  @if (task(); as currentTask) {
+    <!-- Header Section -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 text-transparent bg-clip-text">
+        Bulk Evaluation Status
+      </h1>
+      <div class="mt-2 text-gray-400">
+        Task ID: {{ currentTask.id }}
+      </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="backdrop-blur-lg bg-slate-800/30 rounded-2xl p-6 shadow-xl border border-slate-700/50 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-200">
+            Status:
+            <span [class]="getStatusClass(currentTask.status)">
+                {{ currentTask.status | titlecase }}
+              </span>
+          </h2>
+          <p class="text-sm text-gray-400 mt-1">
+            Started: {{ currentTask.createdTime | date:'medium' }}
+          </p>
+        </div>
+        <div class="text-right">
+          <div class="text-2xl font-bold text-gray-200">
+            {{ currentTask.results.length }} / {{ currentTask.data.length }}
+          </div>
+          <div class="text-sm text-gray-400">CVEs Processed</div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-slate-700/50 rounded-full h-2">
+        <div
+          class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-500"
+          [style.width.%]="progress()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="space-x-4">
+        <button
+          (click)="expandAll()"
+          class="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg text-sm font-medium text-gray-200 transition-colors">
+          Expand All
+        </button>
+        <button
+          (click)="collapseAll()"
+          class="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg text-sm font-medium text-gray-200 transition-colors">
+          Collapse All
+        </button>
+      </div>
+      <div class="flex items-center space-x-2 text-sm text-gray-400">
+        <span>Show:</span>
+        <select
+          (change)="updateFilter($event)"
+          class="bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-1.5 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">All CVEs</option>
+          <option value="processed">Processed Only</option>
+          <option value="pending">Pending Only</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Results Grid -->
+      <!-- Results Grid -->
+    <div class="grid grid-cols-1 gap-4">
+      @for (cveId of filteredCves(); track cveId) {
+        <div class="backdrop-blur-lg bg-slate-800/30 rounded-xl border border-slate-700/50 overflow-hidden">
+          <div
+            (click)="toggleExpanded(cveId)"
+            class="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition-colors">
+            <div class="flex items-center space-x-4">
+              <!-- Status Icon -->
+              @if (getResult(cveId)?.result) {
+                <!-- Successfully evaluated -->
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              } @else if (getResult(cveId)?.notes) {
+                <!-- Evaluation failed with error -->
+                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              } @else if (currentTask.status === 'failed') {
+                <!-- Task failed before processing this CVE -->
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              } @else {
+                <!-- Still processing -->
+                <div class="w-5 h-5">
+                  <div class="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              }
+
+              <h3 class="text-lg font-medium text-gray-200">{{ cveId }}</h3>
+
+              <!-- Show error indicator if there's a note -->
+              @if (getResult(cveId)?.notes) {
+                <span class="text-sm text-amber-500">Failed</span>
+              }
+
+              <!-- Expand/Collapse Icon -->
+              <svg
+                class="w-5 h-5 text-gray-400 transition-transform duration-200"
+                [class.rotate-180]="isExpanded(cveId)"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            <!-- Action Label (only for successful evaluations) -->
+            @if (getResult(cveId)?.result) {
+              <span [class]="getActionClass(getResult(cveId)!.result!.action)"
+                    class="px-3 py-1 rounded-full text-sm font-medium">
+            {{ getResult(cveId)!.result!.action | uppercase }}
+          </span>
+            }
+          </div>
+
+          <!-- Expanded Content -->
+          @if (isExpanded(cveId)) {
+            <div class="border-t border-slate-700/50 transition-all p-4">
+              @if (getResult(cveId)?.result) {
+                <app-ssvc-result-grid [result]="getResult(cveId)!.result!" />
+              } @else if (getResult(cveId)?.notes) {
+                <div class="flex items-start space-x-3 text-amber-500">
+                  <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <h4 class="font-medium">Evaluation Failed</h4>
+                    <p class="mt-1 text-sm">{{ getResult(cveId)!.notes }}</p>
+                  </div>
+                </div>
+              } @else {
+                <div class="text-center text-gray-400 py-4">
+                  @if (currentTask.status === 'failed') {
+                    <p>Task failed before processing this CVE</p>
+                  } @else {
+                    <p>Waiting to be processed...</p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

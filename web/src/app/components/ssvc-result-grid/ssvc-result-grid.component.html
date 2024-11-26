@@ -1,0 +1,66 @@
+<div class="space-y-6">
+  <!-- Action Result -->
+  <div class="bg-slate-800/30 backdrop-blur-sm border border-slate-700/50 rounded-lg p-6">
+    <h2 class="text-2xl font-bold text-center mb-2 text-gray-100">
+      Recommended Action
+    </h2>
+    <div class="flex justify-center">
+                <span [class]="assessmentStyles['action'][result()!.action]"
+                      class="px-4 py-2 rounded-full text-lg font-semibold">
+                  {{ result()!.action.toUpperCase() }}
+                </span>
+    </div>
+  </div>
+
+  <!-- Evaluation Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4" @staggeredFadeIn>
+    <app-decision-point-result-card
+      class="card-item"
+      title="Automatability"
+      category="automatability"
+      [result]="result()!.automatability"
+    />
+    <app-decision-point-result-card
+      class="card-item"
+      title="Exploitation"
+      category="exploitation"
+      [result]="result()!.exploitation"
+    />
+    <app-decision-point-result-card
+      class="card-item"
+      title="Exposure"
+      category="exposure"
+      [result]="result()!.exposure"
+    />
+    <app-decision-point-result-card
+      class="card-item"
+      title="Mission Impact"
+      category="missionImpact"
+      [result]="result()!.missionImpact"
+    />
+    <app-decision-point-result-card
+      class="card-item"
+      title="Mission Prevalence"
+      category="missionPrevalence"
+      [result]="result()!.missionPrevalence"
+    />
+    <app-decision-point-result-card
+      class="card-item"
+      title="Public Wellbeing"
+      category="publicWellbeing"
+      [result]="result()!.publicWellbeing"
+    />
+    <app-decision-point-result-card
+      class="card-item"
+      title="Technical Impact"
+      category="technicalImpact"
+      [result]="result()!.technicalImpact"
+    />
+    <app-decision-point-result-card
+      class="card-item"
+      title="Value Density"
+      category="valueDensity"
+      [result]="result()!.valueDensity"
+    />
+  </div>
+</div>

@@ -1,15 +1,16 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { EvaluationResult } from '../../types';
 import { assessmentStyles } from '../../constants';
 
 @Component({
-    selector: 'app-result-card',
-    templateUrl: 'result-card.component.html',
+    selector: 'app-decision-point-result-card',
+    templateUrl: 'decision-point-result-card.component.html',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgClass],
 })
-export class ResultCardComponent<T> {
+export class DecisionPointResultCardComponent<T> {
     public readonly title = input.required<string>();
     public readonly category = input.required<string>();
     public readonly result = input.required<EvaluationResult<T>>();
