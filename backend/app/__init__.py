@@ -43,6 +43,6 @@ def create_app() -> FastAPI:
         if result is None:
             raise HTTPException(400, detail='Could not evaluate the cve.')
 
-        return dataclass_to_camelcase_dict(result)
+        return dataclass_to_camelcase_dict(result[1])
 
     return app

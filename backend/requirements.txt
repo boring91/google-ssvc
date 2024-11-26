@@ -13,3 +13,4 @@ urllib3~=2.2.3
 plotly~=5.24.1
 fastapi~=0.115.5
 uvicorn~=0.32.1
+celery~=5.4.0

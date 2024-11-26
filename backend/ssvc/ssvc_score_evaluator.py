@@ -1,6 +1,7 @@
 import json
+import uuid
 from dataclasses import dataclass, asdict
-from typing import Literal, Optional
+from typing import Literal, Optional, Tuple
 
 import concurrent.futures
 import pandas as pd
@@ -86,13 +87,13 @@ class SsvcScoreEvaluator:
                          'act']
         })
 
-    def evaluate(self, cve_id: str, reevaluate: bool = False) -> Optional[SsvcEvaluationResult]:
+    def evaluate(self, cve_id: str, reevaluate: bool = False) -> Optional[Tuple[str, SsvcEvaluationResult]]:
         if not reevaluate:
             # Check the cache first
             with Db() as db:
                 result = db.first('SELECT * FROM ssvc_results WHERE cve_id=%s', (cve_id,))
                 if result is not None:
-                    return from_json(result['result'], SsvcEvaluationResult)
+                    return result['id'], from_json(result['result'], SsvcEvaluationResult)
         else:
             with Db() as db:
                 db.execute('DELETE FROM ssvc_results WHERE cve_id=%s', (cve_id,))
@@ -103,12 +104,7 @@ class SsvcScoreEvaluator:
 
         if results is None or any(r is None for r in results.values()):
             print('One of them is none')
-            if results is not None:
-                for r in results:
-                    print(r, results[r])
             return None
-
-        print()
 
         mission_prevalence_wellbeing = self._mission_prevalence_wellbeing_df.loc[
             results['mission_prevalence'].assessment, results['public_wellbeing'].assessment]
@@ -132,8 +128,9 @@ class SsvcScoreEvaluator:
         )
 
         # Cache the result:
+        result_id = str(uuid.uuid4())
         with Db() as db:
-            db.execute('INSERT INTO ssvc_results(cve_id, result) VALUES (%s, %s)',
-                       (cve_id, json.dumps(asdict(result))))
+            db.execute('INSERT INTO ssvc_results(id, cve_id, result) VALUES (%s, %s)',
+                       (result_id, cve_id, json.dumps(asdict(result))))
 
-        return result
+        return result_id, result
