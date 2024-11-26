@@ -11,7 +11,7 @@ import { AppService } from '../../services/app.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SsvcResultGridComponent } from '../../components';
 import { CommonModule } from '@angular/common';
-import { interval, Subscription } from 'rxjs';
+import { catchError, interval, Subscription } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { assessmentStyles } from '../../constants';
 
@@ -54,11 +54,12 @@ export class TaskDetailPageComponent {
         }
     });
 
-    private readonly destroyRef = inject(DestroyRef);
-    private pollingSubscription?: Subscription;
-    private readonly POLLING_INTERVAL = 5000; // 5 seconds
     private readonly expandedCves = signal<Set<string>>(new Set());
     private readonly filterType = signal<FilterType>('all');
+
+    private readonly destroyRef = inject(DestroyRef);
+    private pollingSubscription?: Subscription;
+    private readonly pollingInterval = 5000; // 5 seconds
 
     public constructor(
         private readonly appService: AppService,
@@ -66,39 +67,6 @@ export class TaskDetailPageComponent {
         private readonly router: Router,
     ) {
         this.load().then();
-    }
-
-    private async load(): Promise<void> {
-        const taskId = this.activatedRoute.snapshot.paramMap.get('id');
-        if (!taskId) {
-            await this.router.navigate(['']);
-            return;
-        }
-
-        // Initial load
-        this.appService.getTask(taskId).subscribe(item => {
-            this.task.set(item);
-            this.setupPolling(taskId);
-        });
-    }
-
-    private setupPolling(taskId: string): void {
-        // Clear any existing polling
-        this.pollingSubscription?.unsubscribe();
-
-        // Start polling if task is not complete
-        if (!this.isComplete()) {
-            this.pollingSubscription = interval(this.POLLING_INTERVAL)
-                .pipe(takeUntilDestroyed(this.destroyRef))
-                .subscribe(() => {
-                    this.appService.getTask(taskId).subscribe(item => {
-                        this.task.set(item);
-                        if (this.isComplete()) {
-                            this.pollingSubscription?.unsubscribe();
-                        }
-                    });
-                });
-        }
     }
 
     protected getStatusClass(status: Task['status']): string {
@@ -153,5 +121,46 @@ export class TaskDetailPageComponent {
         const select = event.target as HTMLSelectElement;
         this.filterType.set(select.value as FilterType);
         this.expandedCves.set(new Set()); // Reset expanded state when filter changes
+    }
+
+    private async load(): Promise<void> {
+        const taskId = this.activatedRoute.snapshot.paramMap.get('id');
+        if (!taskId) {
+            await this.router.navigate(['']);
+            return;
+        }
+
+        // Initial load
+        this.appService
+            .getTask(taskId)
+            .pipe(
+                catchError(async e => {
+                    await this.router.navigate(['']);
+                    throw e;
+                }),
+            )
+            .subscribe(item => {
+                this.task.set(item);
+                this.setupPolling(taskId);
+            });
+    }
+
+    private setupPolling(taskId: string): void {
+        // Clear any existing polling
+        this.pollingSubscription?.unsubscribe();
+
+        // Start polling if task is not complete
+        if (!this.isComplete()) {
+            this.pollingSubscription = interval(this.pollingInterval)
+                .pipe(takeUntilDestroyed(this.destroyRef))
+                .subscribe(() => {
+                    this.appService.getTask(taskId).subscribe(item => {
+                        this.task.set(item);
+                        if (this.isComplete()) {
+                            this.pollingSubscription?.unsubscribe();
+                        }
+                    });
+                });
+        }
     }
 }
