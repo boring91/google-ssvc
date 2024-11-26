@@ -29,8 +29,20 @@ def submit_task(
     return task_id
 
 
+@worker_process_init.connect
+def worker_process_init_handler(**kwargs):
+    """Initialize the DB pool when the worker starts"""
+    Db._pool = None  # Ensure we create a fresh pool
+
+
+@worker_process_shutdown.connect
+def worker_process_shutdown_handler(**kwargs):
+    """Clean up DB connections when the worker shuts down"""
+    Db.close_all_connections()
+
+
 @task_prerun.connect
-def handler(task_id, task, *args, **kwargs):
+def task_prerun_handler(task_id, task, *args, **kwargs):
     with Db() as db:
         db.execute(
             'UPDATE tasks SET status = %s WHERE id = %s',

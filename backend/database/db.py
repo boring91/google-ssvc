@@ -1,6 +1,7 @@
 import os
-from typing import Optional, Tuple, Union
+import time
 import logging
+from typing import Optional, Tuple, Union
 import pandas as pd
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -25,46 +26,109 @@ class Db:
         >>>     first_user = db.first("SELECT * FROM users LIMIT 1")
     """
 
-    # Initialize a connection pool
-    _pool = psycopg2.pool.SimpleConnectionPool(
-        1, 20,  # Min and max connections in the pool
-        dbname=os.getenv('DB_NAME'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASS'),
-        host=os.getenv('DB_HOST'),
-        port=os.getenv('DB_PORT')
-    )
+    _pool = None  # Initialize as None first
+
+    @classmethod
+    def _init_pool(cls):
+        """Initialize the connection pool with robust connection parameters."""
+        connect_params = {
+            'dbname': os.getenv('DB_NAME'),
+            'user': os.getenv('DB_USER'),
+            'password': os.getenv('DB_PASS'),
+            'host': os.getenv('DB_HOST'),
+            'port': os.getenv('DB_PORT'),
+            'connect_timeout': 10,
+            'gssencmode': 'disable',  # Disable Kerberos authentication
+            'keepalives': 1,
+            'keepalives_idle': 30,
+            'keepalives_interval': 10,
+            'keepalives_count': 5,
+            'application_name': 'your_app_name'
+        }
+
+        try:
+            return psycopg2.pool.SimpleConnectionPool(1, 20, **connect_params)
+        except Exception as e:
+            logging.error(f"Failed to initialize connection pool: {e}")
+            raise
 
     def __init__(self):
         """Initialize the database connection manager with a logger."""
         self._logger = logging.getLogger(self.__class__.__name__)
+        if Db._pool is None:
+            Db._pool = self._init_pool()
+        self._conn = None
+        self._cur = None
 
     def __enter__(self):
         """
-        Context manager entry point. Acquires a connection from the pool.
+        Context manager entry point. Acquires a connection from the pool with retry logic.
 
         Returns:
             Db: The database connection manager instance.
         """
-        self._conn = self._pool.getconn()
-        self._cur = self._conn.cursor(cursor_factory=RealDictCursor)
-        return self
+        retry_count = 3
+        last_exception = None
+
+        while retry_count > 0:
+            try:
+                self._conn = self._pool.getconn()
+
+                # Validate connection is still alive
+                with self._conn.cursor() as test_cur:
+                    test_cur.execute('SELECT 1')
+
+                self._cur = self._conn.cursor(cursor_factory=RealDictCursor)
+                return self
+
+            except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
+                last_exception = e
+                retry_count -= 1
+                self._logger.warning(f"Connection attempt failed, retries left: {retry_count}", exc_info=True)
+
+                # If we got a connection but it was bad, return it to the pool
+                if self._conn is not None:
+                    # noinspection PyBroadException
+                    try:
+                        self._pool.putconn(self._conn, close=True)
+                    except:
+                        pass
+
+                if retry_count > 0:
+                    time.sleep(1)  # Wait before retrying
+
+        self._logger.error("Failed to establish database connection after 3 attempts")
+        raise last_exception
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
         Context manager exit point. Closes the cursor and returns the connection to the pool.
-
-        Args:
-            exc_type: Exception type if an exception occurred
-            exc_value: Exception value if an exception occurred
-            traceback: Traceback if an exception occurred
         """
-        self._cur.close()
-        self._pool.putconn(self._conn)
+        if self._cur is not None:
+            # noinspection PyBroadException
+            try:
+                self._cur.close()
+            except:
+                pass
 
-    def execute(self,
-                query: str,
-                data: Optional[Union[Tuple, list]] = None) -> None:
+        if self._conn is not None:
+            # noinspection PyBroadException
+            try:
+                self._pool.putconn(self._conn)
+            except:
+                pass
+
+    def _check_connection(self):
+        """Verify connection is still valid"""
+        try:
+            with self._conn.cursor() as test_cur:
+                test_cur.execute('SELECT 1')
+        except (psycopg2.OperationalError, psycopg2.InterfaceError):
+            # Connection is bad, try to get a new one
+            self._conn = self._pool.getconn()
+            self._cur = self._conn.cursor(cursor_factory=RealDictCursor)
+
+    def execute(self, query: str, data: Optional[Union[Tuple, list]] = None) -> None:
         """
         Execute a SQL query with optional parameters.
 
@@ -74,23 +138,23 @@ class Db:
 
         Raises:
             Exception: If query execution fails
-
-        Examples:
-            >>> db.execute("UPDATE users SET active = %s WHERE id = %s", (True, 1))
         """
         data = data or ()
         try:
+            self._check_connection()
             self._logger.info(f"Executing query: {query} with data: {data}")
             self._cur.execute(query, data)
             self._conn.commit()
+        except psycopg2.Error as e:
+            self._conn.rollback()
+            self._logger.error(f"Database error executing query: {e}")
+            raise
         except Exception as e:
             self._conn.rollback()
-            self._logger.error(f"Error executing query: {e}")
+            self._logger.error(f"Unexpected error executing query: {e}")
             raise
 
-    def first(self,
-              query: str,
-              data: Optional[Union[Tuple, list]] = None) -> Optional[dict]:
+    def first(self, query: str, data: Optional[Union[Tuple, list]] = None) -> Optional[dict]:
         """
         Execute a query and return the first result as a dictionary.
 
@@ -100,17 +164,10 @@ class Db:
 
         Returns:
             Optional[dict]: First row as a dictionary or None if no results
-
-        Raises:
-            Exception: If query execution fails
-
-        Examples:
-            >>> user = db.first("SELECT * FROM users WHERE id = %s", (1,))
-            >>> if user:
-            >>>     print(user['name'])
         """
         data = data or ()
         try:
+            self._check_connection()
             self._logger.info(f"Fetching first result for query: {query} with data: {data}")
             self._cur.execute(query, data)
             result = self._cur.fetchone()
@@ -119,9 +176,7 @@ class Db:
             self._logger.error(f"Error fetching first result: {e}")
             raise
 
-    def query(self,
-              query: str,
-              data: Optional[Union[Tuple, list]] = None,
+    def query(self, query: str, data: Optional[Union[Tuple, list]] = None,
               index_column: Optional[str] = 'id') -> pd.DataFrame:
         """
         Execute a query and return all results as a pandas DataFrame.
@@ -133,22 +188,16 @@ class Db:
 
         Returns:
             pd.DataFrame: Query results as a pandas DataFrame
-
-        Raises:
-            Exception: If query execution fails
-
-        Examples:
-            >>> df = db.query("SELECT * FROM users WHERE active = %s", (True,))
-            >>> active_users = len(df)
         """
         data = data or ()
         try:
+            self._check_connection()
             self._logger.info(f"Fetching query: {query} with data: {data}")
             self._cur.execute(query, data)
             results = self._cur.fetchall()
             df = pd.DataFrame(results)
 
-            if index_column and index_column in df.columns:
+            if len(df) > 0 and index_column and index_column in df.columns:
                 df = df.set_index(index_column)
 
             return df
@@ -157,34 +206,15 @@ class Db:
             raise
 
     def begin(self):
-        """
-        Start a transaction by disabling autocommit.
-
-        Examples:
-            >>> db.begin()
-            >>> try:
-            >>>     db.execute("INSERT INTO users (name) VALUES (%s)", ("Alice",))
-            >>>     db.execute("UPDATE counts SET user_count = user_count + 1")
-            >>>     db.commit()
-            >>> except:
-            >>>     db.rollback()
-        """
+        """Start a transaction by disabling autocommit."""
+        self._check_connection()
         self._conn.autocommit = False
         self._logger.info("Transaction started")
 
     def commit(self):
-        """
-        Commit the current transaction.
-
-        Raises:
-            Exception: If commit fails
-
-        Examples:
-            >>> db.begin()
-            >>> db.execute("INSERT INTO users (name) VALUES (%s)", ("Alice",))
-            >>> db.commit()
-        """
+        """Commit the current transaction."""
         try:
+            self._check_connection()
             self._conn.commit()
             self._logger.info("Transaction committed")
         except Exception as e:
@@ -193,22 +223,35 @@ class Db:
             raise
 
     def rollback(self):
-        """
-        Rollback the current transaction.
-
-        Raises:
-            Exception: If rollback fails
-
-        Examples:
-            >>> db.begin()
-            >>> try:
-            >>>     db.execute("BAD SQL")
-            >>> except:
-            >>>     db.rollback()
-        """
+        """Rollback the current transaction."""
         try:
-            self._conn.rollback()
-            self._logger.info("Transaction rolled back")
+            if self._conn is not None:
+                self._conn.rollback()
+                self._logger.info("Transaction rolled back")
         except Exception as e:
             self._logger.error(f"Error during rollback: {e}")
             raise
+
+    @classmethod
+    def close_all_connections(cls):
+        """Close all connections in the pool"""
+        if cls._pool is not None:
+            cls._pool.closeall()
+            cls._pool = None
+
+    @classmethod
+    def cleanup_pool(cls):
+        """
+        Clean up the connection pool - call this in Celery task_postrun
+        """
+        if cls._pool is not None:
+            # noinspection PyBroadException
+            try:
+                # Remove any stale connections
+                cls._pool._connect_pool = [
+                    conn for conn in cls._pool._connect_pool
+                    if not conn.closed
+                ]
+            except:
+                # If cleanup fails, close everything
+                cls.close_all_connections()

@@ -41,7 +41,7 @@ class Task:
             results = [
                 TaskResult(r['result_created_time'], r['cve_id'], r['notes'],
                            None if r['result'] is None else from_json(r['result'], SsvcEvaluationResult))
-                for _, r in df.iterrows()
+                for _, r in df.iterrows() if r['result_created_time'] is not None
             ]
 
         return cls(
@@ -82,6 +82,9 @@ class SsvcTaskService:
                 index_column=None
             )
 
+        if len(data) == 0:
+            return []
+
         return Task.from_tasks_dataframe(data)
 
     def get(self, task_id: str) -> Optional[Task]:
@@ -110,7 +113,7 @@ class SsvcTaskService:
         if len(data) == 0:
             return None
 
-        return Task.from_dataframe(data)
+        return Task.from_tasks_dataframe(data)[0]
 
     def submit(self, df: pd.DataFrame, reevaluate: bool = False):
         cve_list = list(set(x.strip().upper() for x in df.values[:, 0]))
