@@ -9,6 +9,4 @@ import { LogoComponent } from './components';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [RouterOutlet, RouterLinkActive, RouterLink, LogoComponent],
 })
-export class AppComponent {
-    public constructor() {}
-}
+export class AppComponent {}
