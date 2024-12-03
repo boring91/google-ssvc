@@ -126,6 +126,15 @@ def create_app() -> FastAPI:
             from app.ssvc_task_service import SsvcTaskService
             service = SsvcTaskService()
 
+            # Ensure that the queue has at most five
+            # pending tasks.
+            max_queue_length = 5
+            with Db() as db:
+                tasks_in_queue_count = db.first('SELECT COUNT(*) AS count FROM tasks WHERE status NOT IN (%s, %s)',
+                                                ('failed', 'succeeded'))['count']
+            if tasks_in_queue_count >= max_queue_length:
+                raise HTTPException(400, 'There is already five or more tasks in queue. Please wait until they finish.')
+
             return {'taskId': service.submit(df, reevaluate)}
 
         except pd.errors.EmptyDataError:
