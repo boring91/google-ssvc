@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from dataclasses import dataclass, asdict
 from typing import Literal, Optional, Tuple
@@ -34,6 +35,8 @@ class SsvcEvaluationResult:
 
 class SsvcScoreEvaluator:
     def __init__(self, llm: Literal['gemini', 'openai'] = 'gemini'):
+        self._logger = logging.getLogger(self.__class__.__name__)
+
         self._aggregators = {
             'automatability': AutomatabilityEvaluationAggregator(llm),
             'exploitation': ExploitationEvaluationAggregator(llm),
@@ -102,7 +105,10 @@ class SsvcScoreEvaluator:
             results = dict(
                 executor.map(lambda x: (x[0], x[1].aggregate(cve_id, reevaluate)), self._aggregators.items()))
 
-        if results is None or any(r is None for r in results.values()):
+        if any(r is None for r in results.values()):
+            none_decision_point = ','.join([r for r in results if results[r] is None])
+            self._logger.warning(
+                f'Result for {cve_id} is none due to one of the decision point is none: {none_decision_point}')
             return None
 
         mission_prevalence_wellbeing = self._mission_prevalence_wellbeing_df.loc[

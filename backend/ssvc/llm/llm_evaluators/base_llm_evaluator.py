@@ -52,7 +52,7 @@ class BaseLlmEvaluator:
         parsed_response = _parse_llm_response(llm_response)
 
         if parsed_response is None:
-            self._logger.warning(f'Llm response could not be parsed.')
+            self._logger.warning(f'Llm response could not be parsed, response: {llm_response}')
             return None
 
         # Cache the response
@@ -98,8 +98,9 @@ class BaseLlmEvaluator:
         available, etc. In addition the style of the assessment should be passive for instance, rather than saying "I am
         unable to find any information about this vulnerability", you should say "No information was found about this 
         vulnerability", you do not have to use those exact same words but you should not use "I"), 4) "confidence": 
-        ranges between 0 and 1, which indicates how confident you are in your assessment, 1 being very confident, and 
-        5) "links": which is an array that contains the related links to the assessment (if any) that support your 
+        ranges between 0 and 1, which indicates how confident you are in your assessment, 1 being very confident. The 
+        `confidence` should be a number; i.e., do not add quotations around it in the json object, and 5) "links": which
+         is an array that contains the related links to the assessment (if any) that support your 
         justification.
 
         You should only respond with the json object nothing more.
@@ -116,19 +117,24 @@ class BaseLlmEvaluator:
 
 
 def _parse_llm_response(llm_response: str) -> Optional[dict]:
-    cleaned = llm_response.replace('\n', '').replace('\t', '')
-    pattern = r'(?:```json)?(\{.+?\})(?:```)?'
-    match = re.search(pattern, cleaned)
+    # noinspection PyBroadException
+    try:
+        cleaned = llm_response.replace('\n', '').replace('\t', '')
+        pattern = r'(?:```json)?(\{.+?\})(?:```)?'
+        match = re.search(pattern, cleaned)
 
-    if match:
-        captured_group = match.group(1)
-        result: dict = json.loads(captured_group)
+        if match:
+            captured_group = match.group(1)
+            result: dict = json.loads(captured_group)
 
-        if 'assessment' in result:
-            return result
+            if 'assessment' in result:
+                return result
+
+            else:
+                return None
 
         else:
             return None
 
-    else:
+    except:
         return None

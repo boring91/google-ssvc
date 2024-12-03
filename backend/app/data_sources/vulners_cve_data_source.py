@@ -16,7 +16,4 @@ class VulnersCveDataSource(CveDataSource):
         return 'vulners'
 
     def _load_data(self, cve_id: str) -> Optional[dict]:
-        try:
-            return self._vulners_api.get_bulletin(cve_id, fields=["*"])
-        except:
-            return None
+        return self._vulners_api.get_bulletin(cve_id, fields=["*"])

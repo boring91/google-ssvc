@@ -29,7 +29,11 @@ class CveDataSource:
                 db.execute('DELETE FROM cve_cache WHERE cve_id = %s AND source = %s',
                            (cve_id, self._source_name))
 
-        cve_data = self._load_data(cve_id)
+        try:
+            cve_data = self._load_data(cve_id)
+        except Exception as e:
+            self._logger.warning(f'Could not load file from source {self.name()}: {e}')
+            return None
 
         if cve_data is None:
             return None

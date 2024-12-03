@@ -6,6 +6,8 @@ from ssvc.llm.llm_clients.llm_client import LlmClient
 
 class GeminiLlmClient(LlmClient):
     def __init__(self):
+        super().__init__()
+
         self._generation_config = {
             "max_output_tokens": 8192,
             "temperature": 1,
@@ -34,7 +36,7 @@ class GeminiLlmClient(LlmClient):
         vertexai.init(project="sw-supply-chain-sec-dev-1184", location="australia-southeast1")
         self._model = GenerativeModel("gemini-1.5-pro-001")
 
-    def respond(self, query) -> str:
+    def _process(self, query: str) -> str:
         responses = self._model.generate_content(
             query,
             generation_config=self._generation_config,

@@ -19,7 +19,4 @@ class NistCveDataSource(CveDataSource):
         if response.status_code != 200:
             return None
 
-        try:
-            return dict(response.json()['vulnerabilities'][0]['cve'])
-        except:
-            return None
+        return dict(response.json()['vulnerabilities'][0]['cve'])
