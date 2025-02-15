@@ -1,3 +1,4 @@
+--+migrate-no-transaction
 CREATE TABLE tasks
 (
     id            UUID PRIMARY KEY     DEFAULT gen_random_uuid(),

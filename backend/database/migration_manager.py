@@ -1,6 +1,6 @@
 import os
 import hashlib
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import logging
 
 import pandas as pd
@@ -12,6 +12,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 class MigrationManager:
+    # Special comment markers
+    NO_TRANSACTION_MARKER = '--+migrate-no-transaction'
+
     def __init__(self, db: Db, migrations_dir: str):
         """
         Initialize the migration manager.
@@ -35,6 +38,31 @@ class MigrationManager:
                     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+
+    def _parse_migration_file(self, sql: str) -> Tuple[bool, List[str]]:
+        """
+        Parse migration file content and determine transaction requirements.
+        Returns (no_transaction_required, statements)
+        """
+        # Check first non-empty lines for transaction marker
+        first_lines = sql.split('\n', 5)[:5]  # Check first 5 lines
+        no_transaction = any(
+            self.NO_TRANSACTION_MARKER in line.lower().replace(' ', '')
+            for line in first_lines
+        )
+
+        # Remove any lines that start with our special marker
+        sql_lines = [
+            line for line in sql.split('\n')
+            if not line.strip().lower().replace(' ', '').startswith(self.NO_TRANSACTION_MARKER)
+        ]
+        cleaned_sql = '\n'.join(sql_lines)
+
+        # Parse the cleaned SQL
+        parser = SQLParser(cleaned_sql)
+        statements = list(parser.parse_statements())
+
+        return no_transaction, statements
 
     def _get_applied_migrations(self) -> Dict[str, str]:
         """Get all applied migrations and their hashes."""
@@ -72,14 +100,16 @@ class MigrationManager:
         with open(filepath, 'r') as f:
             sql = f.read()
 
+        # Check if this migration should run without a transaction
+        no_transaction, statements = self._parse_migration_file(sql)
+
         with self._db as db:
             try:
-                # Start transaction
-                db.begin()
+                if not no_transaction:
+                    db.begin()
 
                 # Execute migration
-                parser = SQLParser(sql)
-                for statement in parser.parse_statements():
+                for statement in statements:
                     if statement.strip():
                         db.execute(statement)
 
@@ -90,11 +120,13 @@ class MigrationManager:
                 )
 
                 # Commit transaction
-                db.commit()
+                if not no_transaction:
+                    db.commit()
                 logging.info(f"Applied migration: {filename}")
 
             except Exception as e:
-                db.rollback()
+                if not no_transaction:
+                    db.rollback()
                 logging.error(f"Error applying migration {filename}: {str(e)}")
                 raise
 

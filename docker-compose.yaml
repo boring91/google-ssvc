@@ -8,6 +8,11 @@ services:
             - .env.prod
         restart: unless-stopped
 
+    ssvc-rabbitmq:
+        image: rabbitmq:4-alpine
+        container_name: ssvc-rabbitmq
+        restart: unless-stopped
+
     ssvc-backend:
         image: boring91/ssvcbackend
         container_name: ssvc-backend
@@ -15,7 +20,19 @@ services:
             - .env.prod
         depends_on:
             - ssvc-db
+            - ssvc-rabbitmq
         restart: unless-stopped
+
+    ssvc-celery-worker:
+        image: boring91/ssvcbackend
+        container_name: ssvc-celery-worker
+        env_file:
+            - .env.prod
+        depends_on:
+            - ssvc-db
+            - ssvc-rabbitmq
+        restart: unless-stopped
+        command: bash -c "PYTHONPATH=$$PYTHONPATH:../ celery -A tasking worker --loglevel=INFO --concurrency=1 --pool=solo"
 
     ssvc-web:
         image: boring91/ssvcweb

@@ -27,15 +27,13 @@ def create_app() -> FastAPI:
     migration_manager.migrate()
 
     app = FastAPI(
-        title="SSVC Evaluation API",
+        title='SSVC Evaluation API',
         description="""
         API for evaluating Common Vulnerabilities and Exposures (CVEs) using the 
         Stakeholder-Specific Vulnerability Categorization (SSVC) methodology.
         """,
-        version="1.0.0",
-        docs_url="/docs",
-        redoc_url="/redoc",
-        swagger_ui_parameters={"defaultModelsExpandDepth": -1}  # This hides the schemas section
+        version='1.0.0',
+        swagger_ui_parameters={'defaultModelsExpandDepth': -1},  # This hides the schemas section
     )
 
     # noinspection PyTypeChecker
@@ -48,7 +46,7 @@ def create_app() -> FastAPI:
 
     @app.get(
         '/ssvc/evaluate/{cve_id}',
-        summary="Evaluate single CVE",
+        summary='Evaluate single CVE',
         description="""
         Evaluates a single CVE using the SSVC methodology.
         The CVE ID must follow the format: CVE-YYYY-NNNNNNN, GO-YYYY-NNNNNNN, 
@@ -56,8 +54,8 @@ def create_app() -> FastAPI:
         """
     )
     def query(
-            cve_id: str = Path(..., example="CVE-2024-12345", description="The CVE identifier to evaluate"),
-            reevaluate: bool = Query(False, description="Force re-evaluation even if results exist")
+            cve_id: str = Path(..., example='CVE-2024-12345', description='The CVE identifier to evaluate'),
+            reevaluate: bool = Query(False, description='Force re-evaluation even if results exist')
     ):
         # Ensure that we have a valid cve_id:
         cve_id = cve_id.upper().strip()
@@ -76,8 +74,8 @@ def create_app() -> FastAPI:
 
     @app.get(
         '/ssvc/bulk-evaluate',
-        summary="List bulk evaluation tasks",
-        description="Retrieves a list of all bulk evaluation tasks and their current status."
+        summary='List bulk evaluation tasks',
+        description='Retrieves a list of all bulk evaluation tasks and their current status.'
     )
     async def list_bulk_evaluate_tasks():
         from app.ssvc_task_service import SsvcTaskService
@@ -86,11 +84,11 @@ def create_app() -> FastAPI:
 
     @app.get(
         '/ssvc/bulk-evaluate/{task_id}',
-        summary="Get bulk evaluation task status",
-        description="Retrieves the status and results of a specific bulk evaluation task."
+        summary='Get bulk evaluation task status',
+        description='Retrieves the status and results of a specific bulk evaluation task.'
     )
     async def get_bulk_evaluate_task(
-            task_id: str = Path(..., description="The unique identifier of the bulk evaluation task")
+            task_id: str = Path(..., description='The unique identifier of the bulk evaluation task')
     ):
         from app.ssvc_task_service import SsvcTaskService
         service = SsvcTaskService()
@@ -103,15 +101,15 @@ def create_app() -> FastAPI:
 
     @app.post(
         '/ssvc/bulk-evaluate',
-        summary="Submit bulk evaluation task",
+        summary='Submit bulk evaluation task',
         description="""
         Submits a CSV file containing CVE IDs for bulk evaluation.
         The CSV file must contain exactly one column with CVE IDs.
         """
     )
     async def bulk_evaluate(
-            file: UploadFile = File(..., description="CSV file containing CVE IDs"),
-            reevaluate: bool = Query(False, description="Force re-evaluation of existing results")
+            file: UploadFile = File(..., description='CSV file containing CVE IDs'),
+            reevaluate: bool = Query(False, description='Force re-evaluation of existing results')
     ):
         if not file.filename.endswith('.csv'):
             raise HTTPException(400, 'File must be CSV.')

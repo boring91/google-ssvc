@@ -1,2 +1,2 @@
-CREATE
-    EXTENSION IF NOT EXISTS "pgcrypto";
+--+migrate-no-transaction
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";

@@ -1,3 +1,4 @@
+--+migrate-no-transaction
 CREATE TABLE ssvc_results
 (
     id            UUID PRIMARY KEY     DEFAULT gen_random_uuid(),

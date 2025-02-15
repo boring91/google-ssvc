@@ -1,3 +1,4 @@
+--+migrate-no-transaction
 CREATE TABLE llm_evaluator_cache
 (
     id             UUID PRIMARY KEY     DEFAULT gen_random_uuid(),

@@ -1,3 +1,4 @@
+--+migrate-no-transaction
 CREATE
     OR REPLACE FUNCTION update_modified_column()
     RETURNS TRIGGER AS

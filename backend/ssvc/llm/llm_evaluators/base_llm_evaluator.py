@@ -80,7 +80,7 @@ class BaseLlmEvaluator:
         pass
 
     def _get_prompt(self, cve_id: str, cve_data: str) -> str:
-        return f"""I am going to give you an ID of a specific ID and some data related to that CVE in a json format. The 
+        return f"""I am going to give you an ID of a specific CVE ID and some data related to that CVE in a json format. The 
         json object has at its roots properties that represent different data sources, each property of these is 
         assigned to another json object that represent the information about the given CVE from that data source. Your 
         role is to use the provided information from these data sources and answer the following question:

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LogoComponent } from './components';
+import { environment } from '../environments/environment';
 
 @Component({
     selector: 'app-root',
@@ -9,4 +10,6 @@ import { LogoComponent } from './components';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [RouterOutlet, RouterLinkActive, RouterLink, LogoComponent],
 })
-export class AppComponent {}
+export class AppComponent {
+    protected readonly environment = environment;
+}

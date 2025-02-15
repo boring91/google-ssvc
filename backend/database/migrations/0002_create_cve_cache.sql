@@ -1,3 +1,4 @@
+--+migrate-no-transaction
 CREATE TABLE cve_cache
 (
     id            UUID PRIMARY KEY      DEFAULT gen_random_uuid(),

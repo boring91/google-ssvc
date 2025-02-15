@@ -10,7 +10,7 @@ class GeminiLlmClient(LlmClient):
 
         self._generation_config = {
             "max_output_tokens": 8192,
-            "temperature": 1,
+            "temperature": 0.2,
             "top_p": 0.95,
         }
 
