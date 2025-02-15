@@ -3,6 +3,7 @@ from typing import List
 from app.data_sources.cisa_kev_cve_data_source import CisaKevCveDataSource
 from app.data_sources.cisa_vulnrichment_cve_data_source import CisaVulnrichmentCveDataSource
 from app.data_sources.cve_data_source import CveDataSource
+from app.data_sources.hackernews_cve_data_source import HackernewsCveDataSource
 from app.data_sources.nist_cve_data_source import NistCveDataSource
 from app.data_sources.osv_cve_data_source import OsvCveDataSource
 from app.data_sources.vulners_cve_data_source import VulnersCveDataSource
@@ -16,6 +17,7 @@ class CveDataSourceAggregator:
             CisaKevCveDataSource(),
             CisaVulnrichmentCveDataSource(),
             OsvCveDataSource(),
+            HackernewsCveDataSource(),
         ]
 
     def load(self, cve_id: str) -> dict:
