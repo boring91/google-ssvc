@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 from abc import abstractmethod
 from typing import Literal, Optional
 
@@ -9,6 +8,7 @@ from database.db import Db
 from ssvc.llm.llm_clients.gemini_llm_client import GeminiLlmClient
 from ssvc.llm.llm_clients.llm_client import LlmClient
 from ssvc.llm.llm_clients.openai_llm_client import OpenaiLlmClient
+from ssvc.llm.utils import parse_llm_response
 
 
 class BaseLlmEvaluator:
@@ -49,7 +49,7 @@ class BaseLlmEvaluator:
             self._logger.error(f'An error occurred while fetching llm response. {e}')
             return None
 
-        parsed_response = _parse_llm_response(llm_response)
+        parsed_response = parse_llm_response(llm_response)
 
         if parsed_response is None:
             self._logger.warning(f'Llm response could not be parsed, response: {llm_response}')
@@ -114,27 +114,3 @@ class BaseLlmEvaluator:
     def _get_cve_data(self, cve_id) -> str:
         cve_data = self._cve_data_source_aggregator.load(cve_id)
         return json.dumps(cve_data)
-
-
-def _parse_llm_response(llm_response: str) -> Optional[dict]:
-    # noinspection PyBroadException
-    try:
-        cleaned = llm_response.replace('\n', '').replace('\t', '')
-        pattern = r'(?:```json)?(\{.+?\})(?:```)?'
-        match = re.search(pattern, cleaned)
-
-        if match:
-            captured_group = match.group(1)
-            result: dict = json.loads(captured_group)
-
-            if 'assessment' in result:
-                return result
-
-            else:
-                return None
-
-        else:
-            return None
-
-    except:
-        return None
