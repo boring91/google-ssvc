@@ -71,8 +71,9 @@ class LlmClient:
             try:
                 return self._process(query)
 
-            except:
+            except Exception as e:
                 self._logger.warning(f'Could not find a proper response to query: {query}.')
+                self._logger.error(e)
                 return ''
 
         result = run_process()

@@ -1,5 +1,5 @@
-import vertexai
-from vertexai.generative_models import SafetySetting, GenerativeModel
+from google import genai
+from google.genai import types
 
 from ssvc.llm.llm_clients.llm_client import LlmClient
 
@@ -14,43 +14,47 @@ class GeminiLlmClient(LlmClient):
             "top_p": 0.95,
         }
 
-        self._safety_settings = [
-            SafetySetting(
-                category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                threshold=SafetySetting.HarmBlockThreshold.BLOCK_ONLY_HIGH
-            ),
-            SafetySetting(
-                category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                threshold=SafetySetting.HarmBlockThreshold.BLOCK_ONLY_HIGH
-            ),
-            SafetySetting(
-                category=SafetySetting.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                threshold=SafetySetting.HarmBlockThreshold.BLOCK_ONLY_HIGH
-            ),
-            SafetySetting(
-                category=SafetySetting.HarmCategory.HARM_CATEGORY_HARASSMENT,
-                threshold=SafetySetting.HarmBlockThreshold.BLOCK_ONLY_HIGH
-            )
-        ]
+        self._safety_settings = types.GenerateContentConfig(
+            temperature=1,
+            top_p=1,
+            seed=0,
+            max_output_tokens=65535,
+            safety_settings=[types.SafetySetting(
+                category="HARM_CATEGORY_HATE_SPEECH",
+                threshold="OFF"
+            ), types.SafetySetting(
+                category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                threshold="OFF"
+            ), types.SafetySetting(
+                category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold="OFF"
+            ), types.SafetySetting(
+                category="HARM_CATEGORY_HARASSMENT",
+                threshold="OFF"
+            )],
+        )
 
-        vertexai.init(project="sw-supply-chain-sec-dev-1184", location="australia-southeast1")
-        self._model = GenerativeModel("gemini-1.5-pro-001")
+        self._client = genai.Client(
+            vertexai=True,
+            project="sw-supply-chain-sec-dev-1184",
+            location="global",
+        )
 
     def _process(self, query: str) -> str:
-        responses = self._model.generate_content(
-            query,
-            generation_config=self._generation_config,
-            safety_settings=self._safety_settings,
-            stream=True)
+        response = self._client.models.generate_content(
+            model="gemini-2.5-flash-preview-05-20",
+            contents=[
+                types.Content(
+                    role="user",
+                    parts=[
+                        types.Part.from_text(text=query)
+                    ]
+                ),
+            ],
+            config=self._safety_settings
+        )
 
-        answer_parts = []
-
-        for response in responses:
-            answer_parts.append(response.text)
-
-        answer = ''.join(answer_parts)
-
-        return answer
+        return response.text
 
 
 gemini_llm_client = GeminiLlmClient()
