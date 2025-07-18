@@ -42,7 +42,7 @@ class GeminiLlmClient(LlmClient):
 
     def _process(self, query: str) -> str:
         response = self._client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.5-flash",
             contents=[
                 types.Content(
                     role="user",
